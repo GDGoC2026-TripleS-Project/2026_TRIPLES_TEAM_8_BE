@@ -84,14 +84,14 @@ jobs:
           OPENWEATHER_API_KEY=${{ secrets.WEATHER_SERVICE_KEY }}
           EOL
   
-          echo "Stopping spring-boot-app container..."
-          docker-compose --env-file .env stop app || true
+          DOCKER_COMPOSE="docker compose"
+          command -v docker-compose >/dev/null 2>&1 && DOCKER_COMPOSE="docker-compose"
 
-          echo "Removing spring-boot-app container..."
-          docker-compose --env-file .env rm -f app || true
+          $DOCKER_COMPOSE --env-file .env stop app || true
+          $DOCKER_COMPOSE --env-file .env rm -f app || true
+          $DOCKER_COMPOSE --env-file .env up -d --no-deps app
+          $DOCKER_COMPOSE ps
 
-          echo "Recreating spring-boot-app service with docker-compose..."
-          docker-compose --env-file .env up -d --no-deps --build app
 
           echo "Checking Docker containers..."
           docker-compose ps
