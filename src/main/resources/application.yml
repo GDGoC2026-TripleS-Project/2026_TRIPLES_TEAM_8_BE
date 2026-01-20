@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER_NAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/Gread?serverTimezone=Asia/Seoul
+    username: root
+    password: Qepoal1379#!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
