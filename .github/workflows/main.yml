@@ -37,6 +37,16 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build -x test
 
+### (추가) 빌드 산출물 jar 위치 확인
+    - name: Show built jars
+      run: |
+        echo "=== list build dirs ==="
+        find . -maxdepth 3 -type d -name build -print
+        echo "=== list jar files ==="
+        find . -maxdepth 6 -type f -path "*build/libs/*.jar" -print
+        echo "=== root build/libs ==="
+        ls -al build/libs || true
+        
     ### Docker 로그인
     - name: Docker login
       uses: docker/login-action@v2
