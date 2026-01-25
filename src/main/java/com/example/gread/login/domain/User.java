@@ -1,0 +1,44 @@
+package com.example.gread.login.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "users")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long id;
+
+    // 구글 소셜 로그인의 고유 식별자
+    @Column(nullable = false, unique = true)
+    private String googleSub;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    // Profile과 1:1 매핑 (User가 생성될 때 Profile도 함께 관리되도록 Cascade 설정)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Profile profile;
+
+    // 사용자가 작성한 리뷰 목록 (1:N)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Review> reviews = new ArrayList<>();
+
+    // 연관관계 편의 메서드 (프로필 설정 시 사용)
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+        if (profile != null && profile.getUser() != this) {
+            profile.setUser(this);
+        }
+    }
+}
