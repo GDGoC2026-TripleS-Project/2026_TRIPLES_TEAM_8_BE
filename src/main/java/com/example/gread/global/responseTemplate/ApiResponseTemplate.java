@@ -59,4 +59,20 @@ public class ApiResponseTemplate<T> {
                         .data(null)
                         .build());
     }
+
+    public static <T> ResponseEntity<ApiResponseTemplate<T>> error(
+            ErrorCode errorCode,
+            T data
+    ) {
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(ApiResponseTemplate.<T>builder()
+                        .status(errorCode.getHttpStatus().value())
+                        .success(false)
+                        .code(errorCode.name())
+                        .message(errorCode.getMessage())
+                        .data(data)
+                        .build());
+    }
+
 }
