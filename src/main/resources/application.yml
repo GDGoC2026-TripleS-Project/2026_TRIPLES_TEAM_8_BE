@@ -1,16 +1,16 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/Gread?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: ***
-    password: ***
+    username:
+    password:
     driver-class-name: com.mysql.cj.jdbc.Driver
   security:
     oauth2:
           client:
             registration:
               google:
-                client-id: 608759947142-m7ugod2n6mcfagmnjf82ug53m6btnshn.apps.googleusercontent.com
-                client-secret: ***
+                client-id: ${GOOGLE_CLIENT_ID}
+                client-secret:
                 redirect-uri: "{baseUrl}/login/oauth2/code/google"
                 scope:
                   - email
