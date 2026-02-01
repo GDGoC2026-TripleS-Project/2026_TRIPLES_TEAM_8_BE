@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReviewReqDto {
 
-    @NotNull(message = "bookId는 필수입니다.")
-    private Long bookId;
-
     @NotNull(message = "reviewColor은 필수입니다.")
     private ReviewColor reviewColor;
 

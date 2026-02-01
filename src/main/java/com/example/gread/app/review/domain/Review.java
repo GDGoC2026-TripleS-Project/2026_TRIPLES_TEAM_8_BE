@@ -42,4 +42,9 @@ public class Review extends BaseTimeEntity{
         this.reviewColor = reviewColor;
         this.reviewContent = reviewContent;
     }
+
+    public void update(ReviewColor reviewColor, String reviewContent) {
+        this.reviewColor = reviewColor;
+        this.reviewContent = reviewContent;
+    }
 }

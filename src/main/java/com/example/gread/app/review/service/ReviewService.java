@@ -61,6 +61,29 @@ public class ReviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ReviewResDto> findLatestReviewsByBookId(Long bookId) {
+        List<Review> reviews = reviewRepository.findByBookIdOrderByCreatedAtDesc(bookId);
+        return reviews.stream()
+                .map(ReviewResDto::from)
+                .toList();
+    }
+
+    @Transactional
+    public ReviewResDto updateReview(ReviewReqDto dto, Long reviewId, Long userId) {
+
+        Review review = reviewRepository
+                .findByReviewId(reviewId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+
+        review.update(
+                dto.getReviewColor(),
+                dto.getReviewContent()
+        );
+
+        return ReviewResDto.from(review);
+    }
+
     @Transactional
     public void deleteReviewById(Long reviewId, Long userId) {
 
