@@ -1,10 +1,20 @@
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER_NAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/Gread?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ***
+    password: ***
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  security:
+    oauth2:
+          client:
+            registration:
+              google:
+                client-id: 608759947142-m7ugod2n6mcfagmnjf82ug53m6btnshn.apps.googleusercontent.com
+                client-secret: ***
+                redirect-uri: "{baseUrl}/login/oauth2/code/google"
+                scope:
+                  - email
+                  - profile
   jpa:
     hibernate:
       ddl-auto: create
@@ -15,5 +25,5 @@ spring:
     open-in-view: false
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: eor3989u2039eufjilkajiw394u82389efhliskdzleft9328u
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
