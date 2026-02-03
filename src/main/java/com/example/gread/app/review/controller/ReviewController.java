@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -35,7 +34,8 @@ public class ReviewController {
             @PathVariable Long bookId,
             @Valid @RequestBody ReviewReqDto dto
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        //Long userId = Long.parseLong(authentication.getName());
+        Long userId = 1L;
 
         ReviewResDto review = reviewService.postReview(dto, userId, bookId);
         return ApiResponseTemplate.success(SuccessCode.OK, review);
@@ -46,7 +46,8 @@ public class ReviewController {
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getMyReviews(
             Authentication authentication
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        //Long userId = Long.parseLong(authentication.getName());
+        Long userId = 1L;
 
         List<ReviewResDto> reviews = reviewService.findReviewByUserId(userId);
         return ApiResponseTemplate.success(SuccessCode.OK, reviews);
@@ -74,10 +75,12 @@ public class ReviewController {
     /* 리뷰 수정 */
     @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<ApiResponseTemplate<ReviewResDto>> updateReview(
+            Authentication authentication,
             @PathVariable Long reviewId,
             @Valid @RequestBody ReviewReqDto dto
     ) {
-        Long userId = 1L; // 테스트
+        //Long userId = Long.parseLong(authentication.getName());
+        Long userId = 1L;
 
         ReviewResDto updatedReview =
                 reviewService.updateReview(dto, reviewId, userId);
@@ -88,9 +91,11 @@ public class ReviewController {
     /* 리뷰 삭제 */
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<ApiResponseTemplate<Void>> deleteReview(
+            Authentication authentication,
             @PathVariable Long reviewId
     ) {
-        Long userId = 1L; // 테스트
+        //Long userId = Long.parseLong(authentication.getName());
+        Long userId = 1L;
 
         reviewService.deleteReviewById(reviewId, userId);
         return ApiResponseTemplate.success(SuccessCode.OK, null);

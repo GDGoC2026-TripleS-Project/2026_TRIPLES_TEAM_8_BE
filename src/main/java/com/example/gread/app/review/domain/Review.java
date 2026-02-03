@@ -33,8 +33,11 @@ public class Review extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private ReviewColor reviewColor;
 
-    @Column
+    @Column(length = 100)
     private String reviewContent;
+
+    @Column
+    private long createdTimeAgo;
 
     public Review(User user, Book book, ReviewColor reviewColor, String reviewContent) {
         this.user = user;
