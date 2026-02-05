@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/users/me")
+@RequestMapping("/api/users/me")
 @RequiredArgsConstructor
 @Tag(name = "MyPage", description = "내 정보 및 내가 쓴 리뷰 API")
 public class MyPageController {
@@ -78,7 +78,7 @@ public class MyPageController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiResponseTemplate.class)))
     })
-    @GetMapping("/reviews")
+    @GetMapping("/api/reviews")
     public ResponseEntity<ApiResponseTemplate<Page<ReviewDto>>> getMyReviews(
             @Parameter(hidden = true) @AuthenticationPrincipal(expression = "username") String email,
             @Parameter(description = "페이지 번호")
