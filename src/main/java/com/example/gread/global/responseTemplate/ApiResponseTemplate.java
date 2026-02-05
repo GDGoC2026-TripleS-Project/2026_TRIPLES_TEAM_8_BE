@@ -12,27 +12,23 @@ import org.springframework.http.ResponseEntity;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-@JsonPropertyOrder({
-        "status",
-        "success",
-        "code",
-        "message",
-        "data"
-})
+@JsonPropertyOrder({"status", "success", "code", "message", "data"})
 public class ApiResponseTemplate<T> {
 
-    private final int status;        // HTTP 상태 코드
-    private final boolean success;   // 성공 여부
-    private final String message;    // 메시지
-    private final String code;       // 내부 코드
-    private final T data;            // 실제 데이터
+    private final int status;
+    private final boolean success;
+    private final String message;
+    private final String code;
+    private final T data;
 
     /* ================= 성공 응답 ================= */
 
-    public static <T> ResponseEntity<ApiResponseTemplate<T>> success(
-            SuccessCode successCode,
-            T data
-    ) {
+    // [추가] SuccessCode 없이 데이터만 보낼 때 사용하는 메서드
+    public static <T> ResponseEntity<ApiResponseTemplate<T>> success(T data) {
+        return success(SuccessCode.OK, data); // 기본적으로 SuccessCode.OK를 사용 (SuccessCode에 OK가 있어야 함)
+    }
+
+    public static <T> ResponseEntity<ApiResponseTemplate<T>> success(SuccessCode successCode, T data) {
         return ResponseEntity
                 .status(successCode.getHttpStatus())
                 .body(ApiResponseTemplate.<T>builder()
@@ -46,9 +42,7 @@ public class ApiResponseTemplate<T> {
 
     /* ================= 실패 응답 ================= */
 
-    public static <T> ResponseEntity<ApiResponseTemplate<T>> error(
-            ErrorCode errorCode
-    ) {
+    public static <T> ResponseEntity<ApiResponseTemplate<T>> error(ErrorCode errorCode) {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(ApiResponseTemplate.<T>builder()

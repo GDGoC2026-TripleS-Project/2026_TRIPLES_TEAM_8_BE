@@ -23,5 +23,11 @@ public class TestController {
         throw new BusinessException(ErrorCode.INTERNAL_SERVER_EXCEPTION);
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponseTemplate<String>> testRoot() {
+        return ApiResponseTemplate.success(SuccessCode.OK, "test controller alive");
+    }
+
+
 }
 
