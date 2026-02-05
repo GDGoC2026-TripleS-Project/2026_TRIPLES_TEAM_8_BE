@@ -1,4 +1,4 @@
-package com.example.gread.global.config;
+/*package com.example.gread.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,3 +28,4 @@ public class SecurityConfig {
                 .build();
     }
 }
+*/
