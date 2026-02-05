@@ -3,9 +3,9 @@ package com.example.gread.app.review.service;
 import com.example.gread.app.review.domain.Review;
 import com.example.gread.app.review.dto.ReviewReqDto;
 import com.example.gread.app.review.dto.ReviewResDto;
-import com.example.gread.app.review.repository.BookRepository;
 import com.example.gread.app.review.repository.ReviewRepository;
-import com.example.gread.app.review.repository.UserRepository;
+import com.example.gread.global.code.ErrorCode;
+import com.example.gread.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +24,10 @@ public class ReviewService {
     public ReviewResDto postReview(ReviewReqDto dto, Long userId, Long bookId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION));
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 책을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.BOOK_NOT_FOUND_EXCEPTION));
 
         Review review = new Review(
                 user,
@@ -72,7 +72,7 @@ public class ReviewService {
 
         Review review = reviewRepository
                 .findByReviewId(reviewId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND_EXCEPTION));
 
         review.update(
                 dto.getReviewColor(),
@@ -87,7 +87,7 @@ public class ReviewService {
 
         Review review = reviewRepository
                 .findByReviewId(reviewId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND_EXCEPTION));
 
         reviewRepository.delete(review);
     }

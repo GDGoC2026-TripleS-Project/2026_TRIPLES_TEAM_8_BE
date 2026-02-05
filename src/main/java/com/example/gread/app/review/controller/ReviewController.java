@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.List;
 @RequestMapping("/api")
 public class ReviewController {
 
-    private final ReviewService reviewService;
+    private final ReviewService bookReviewService;
 
     /* 리뷰 작성 */
     @PostMapping("/books/{bookId}/reviews")
@@ -37,7 +36,7 @@ public class ReviewController {
     ) {
         Long userId = Long.parseLong(authentication.getName());
 
-        ReviewResDto review = reviewService.postReview(dto, userId, bookId);
+        ReviewResDto review = bookReviewService.postReview(dto, userId, bookId);
         return ApiResponseTemplate.success(SuccessCode.OK, review);
     }
 
@@ -48,7 +47,7 @@ public class ReviewController {
     ) {
         Long userId = Long.parseLong(authentication.getName());
 
-        List<ReviewResDto> reviews = reviewService.findReviewByUserId(userId);
+        List<ReviewResDto> reviews = bookReviewService.findReviewByUserId(userId);
         return ApiResponseTemplate.success(SuccessCode.OK, reviews);
     }
 
@@ -57,7 +56,7 @@ public class ReviewController {
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getBookReviews(
             @PathVariable Long bookId
     ) {
-        List<ReviewResDto> reviews = reviewService.findReviewByBookId(bookId);
+        List<ReviewResDto> reviews = bookReviewService.findReviewByBookId(bookId);
         return ApiResponseTemplate.success(SuccessCode.OK, reviews);
     }
 
@@ -66,7 +65,7 @@ public class ReviewController {
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getLatestReviews(
             @PathVariable Long bookId
     ) {
-        List<ReviewResDto> reviews = reviewService.findLatestReviewsByBookId(bookId);
+        List<ReviewResDto> reviews = bookReviewService.findLatestReviewsByBookId(bookId);
 
         return ApiResponseTemplate.success(SuccessCode.OK, reviews);
     }
@@ -74,13 +73,14 @@ public class ReviewController {
     /* 리뷰 수정 */
     @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<ApiResponseTemplate<ReviewResDto>> updateReview(
+            Authentication authentication,
             @PathVariable Long reviewId,
             @Valid @RequestBody ReviewReqDto dto
     ) {
-        Long userId = 1L; // 테스트
+        Long userId = Long.parseLong(authentication.getName());
 
         ReviewResDto updatedReview =
-                reviewService.updateReview(dto, reviewId, userId);
+                bookReviewService.updateReview(dto, reviewId, userId);
 
         return ApiResponseTemplate.success(SuccessCode.OK, updatedReview);
     }
@@ -88,11 +88,12 @@ public class ReviewController {
     /* 리뷰 삭제 */
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<ApiResponseTemplate<Void>> deleteReview(
+            Authentication authentication,
             @PathVariable Long reviewId
     ) {
-        Long userId = 1L; // 테스트
+        Long userId = Long.parseLong(authentication.getName());
 
-        reviewService.deleteReviewById(reviewId, userId);
+        bookReviewService.deleteReviewById(reviewId, userId);
         return ApiResponseTemplate.success(SuccessCode.OK, null);
     }
 }

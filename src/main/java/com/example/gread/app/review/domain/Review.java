@@ -36,6 +36,9 @@ public class Review extends BaseTimeEntity{
     @Column
     private String reviewContent;
 
+    @Column
+    private long createdTimeAgo;
+
     public Review(User user, Book book, ReviewColor reviewColor, String reviewContent) {
         this.user = user;
         this.book = book;
