@@ -52,6 +52,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         log.info("AccessToken: {}", tokenDto.getAccessToken());
         log.info("RefreshToken: {}", tokenDto.getRefreshToken());
         log.info("=============================================");
+
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
                 attributes,
