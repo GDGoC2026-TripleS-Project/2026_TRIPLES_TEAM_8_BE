@@ -1,29 +1,40 @@
 spring:
+  mvc:
+    static-path-pattern: /images/**
+    web:
+      resources:
+        static-locations: classpath:/static/images/
   datasource:
-    url: jdbc:mysql://localhost:3306/Gread?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username:
-    password:
+    url: ${DB_URL}
+    username: ${DB_USER_NAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   security:
     oauth2:
-          client:
-            registration:
-              google:
-                client-id: ${GOOGLE_CLIENT_ID}
-                client-secret:
-                redirect-uri: "{baseUrl}/login/oauth2/code/google"
-                scope:
-                  - email
-                  - profile
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
         format_sql: false
     open-in-view: false
-
+output:
+  ansi:
+    enabled: always
 jwt:
-  secret: eor3989u2039eufjilkajiw394u82389efhliskdzleft9328u
+  secret: ${JWT_SECRET}
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
+logging:
+  level:
+    root: info
+    com.example.gread: debug
