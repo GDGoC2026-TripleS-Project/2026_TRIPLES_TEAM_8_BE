@@ -1,12 +1,11 @@
 package com.example.gread.app.home.service;
 
-import com.example.gread.app.home.domain.ReaderType;
-import com.example.gread.app.home.domain.Review;
 import com.example.gread.app.home.dto.HomeResponseDto;
 import com.example.gread.app.home.dto.ReviewResponseDto;
-import com.example.gread.app.home.repository.ReviewRepository;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.review.domain.Review;
+import com.example.gread.app.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -71,11 +70,10 @@ public class HomeService {
     private List<ReviewResponseDto> convertToDtoList(List<Review> reviews) {
         return reviews.stream()
                 .map(r -> ReviewResponseDto.builder()
-                        .reviewId(r.getId())
+                        .reviewId(r.getReviewId())
                         .category(r.getCategory())
-                        .content(r.getContent())
-                        .authorNickname(r.getUser() != null && r.getUser().getProfile() != null ?
-                                r.getUser().getProfile().getNickname() : "독자")
+                        .content(r.getReviewContent())
+                        .authorNickname(r.getProfile() != null ? r.getProfile().getNickname() : "독자")
                         .createdAt(r.getCreatedAt() != null ? r.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "")
                         .bookTitle(r.getBook() != null ? r.getBook().getTitle() : "제목 없음")
                         .build())

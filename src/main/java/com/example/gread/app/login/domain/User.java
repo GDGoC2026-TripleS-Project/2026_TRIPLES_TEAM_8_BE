@@ -1,7 +1,7 @@
 package com.example.gread.app.login.domain;
 
 import com.example.gread.app.home.domain.ReaderType;
-import com.example.gread.app.home.domain.Review;
+import com.example.gread.app.review.domain.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,7 +45,7 @@ public class User {
     private Profile profile;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     private List<Review> reviews = new ArrayList<>();
 
     public void updateOnboarding(String newNickname, ReaderType readerType) {

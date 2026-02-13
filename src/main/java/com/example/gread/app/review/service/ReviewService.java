@@ -1,0 +1,122 @@
+package com.example.gread.app.review.service;
+
+import com.example.gread.app.login.domain.Book;
+import com.example.gread.app.login.domain.Profile;
+import com.example.gread.app.login.domain.User;
+import com.example.gread.app.login.repository.BookRepository;
+import com.example.gread.app.login.repository.ProfileRepository;
+import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.ranking.domain.Ranking;
+import com.example.gread.app.ranking.repository.RankingRepository;
+import com.example.gread.app.review.domain.Review;
+import com.example.gread.app.review.dto.ReviewReqDto;
+import com.example.gread.app.review.dto.ReviewResDto;
+import com.example.gread.app.review.repository.ReviewRepository;
+import com.example.gread.global.code.ErrorCode;
+import com.example.gread.global.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final ProfileRepository profileRepository;
+    private final BookRepository bookRepository;
+    private final RankingRepository rankingRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public ReviewResDto postReview(ReviewReqDto dto, Long profileId, Long bookId) {
+
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.BOOK_NOT_FOUND));
+
+        Review review = new Review(
+                profile,
+                book,
+                dto.getReviewColor(),
+                dto.getReviewContent(),
+                book.getCategory()
+        );
+
+        Review savedReview = reviewRepository.save(review);
+
+        /* 리뷰 추가 */
+        Ranking ranking = rankingRepository.findRankingByProfileId(profileId)
+                .orElseGet(() -> {
+                    long lowestRank = rankingRepository.count() + 1;
+                    return rankingRepository.save(new Ranking(profile, 0, lowestRank));
+                });
+
+        if (ranking.getId() != null) {
+            ranking.increaseReviewCount();
+        }
+
+        return ReviewResDto.from(savedReview);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResDto> findReviewByProfileId(Long profileId) {
+
+        return reviewRepository.findByProfileId(profileId)
+                .stream()
+                .map(ReviewResDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResDto> findReviewByBookId(Long bookId) {
+
+        return reviewRepository.findByBookId(bookId)
+                .stream()
+                .map(ReviewResDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResDto> findLatestReviewsByBookId(Long bookId) {
+        List<Review> reviews = reviewRepository.findByBookIdOrderByCreatedAtDesc(bookId);
+        return reviews.stream()
+                .map(ReviewResDto::from)
+                .toList();
+    }
+
+    @Transactional
+    public ReviewResDto updateReview(ReviewReqDto dto, Long reviewId, Long userId) {
+
+        Review review = reviewRepository
+                .findByReviewId(reviewId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+
+        review.update(
+                dto.getReviewColor(),
+                dto.getReviewContent()
+        );
+
+        return ReviewResDto.from(review);
+    }
+
+
+    @Transactional(readOnly = true)
+    public Long getReviewCountByBook(Long bookId) {
+        return reviewRepository.countByBookId(bookId);
+    }
+
+    @Transactional
+    public void deleteReviewById(Long reviewId, Long userId) {
+
+        Review review = reviewRepository
+                .findByReviewId(reviewId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+
+        reviewRepository.delete(review);
+    }
+}
