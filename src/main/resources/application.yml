@@ -34,6 +34,7 @@ output:
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
+
 logging:
   level:
     root: info
