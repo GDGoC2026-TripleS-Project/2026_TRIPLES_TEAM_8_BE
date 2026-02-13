@@ -44,6 +44,9 @@ public class Review extends BaseTimeEntity{
 
     @Enumerated(EnumType.STRING)
     private ReviewColor reviewColor;
+    
+    @Column
+    private String title;
 
     @Column
     private String reviewContent;
@@ -66,5 +69,9 @@ public class Review extends BaseTimeEntity{
     public void update(ReviewColor reviewColor, String reviewContent) {
         this.reviewColor = reviewColor;
         this.reviewContent = reviewContent;
+    }
+    
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

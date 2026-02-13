@@ -17,7 +17,7 @@ public enum ErrorCode {
     TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 토큰입니다."),
 
     // 사용자 관련
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 유저가 없습니다.");
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 유저가 없습니다."),
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."), // ✅ HomeService에서 호출하는 심볼 추가
 
     // 리뷰 관련

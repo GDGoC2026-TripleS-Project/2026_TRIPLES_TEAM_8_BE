@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Entity
+@Entity(name = "FeedBook")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

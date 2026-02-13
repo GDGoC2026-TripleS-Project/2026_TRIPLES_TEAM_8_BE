@@ -2,7 +2,7 @@ package com.example.gread.app.feed.service;
 
 import com.example.gread.app.feed.dto.BookDto;
 import com.example.gread.app.feed.entity.Book;
-import com.example.gread.app.feed.repository.BookRepository;
+import com.example.gread.app.feed.repository.FeedBookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FeedServiceImpl implements FeedService {
 
-    private final BookRepository bookRepository;
+    private final FeedBookRepository bookRepository;
 
     @Override
     public Page<BookDto> getBooks(String category, String keyword, Pageable pageable) {

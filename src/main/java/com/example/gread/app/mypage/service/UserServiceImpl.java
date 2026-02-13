@@ -3,10 +3,10 @@ package com.example.gread.app.mypage.service;
 import com.example.gread.app.mypage.dto.ReviewDto;
 import com.example.gread.app.mypage.dto.UpdateUserRequest;
 import com.example.gread.app.mypage.dto.UserProfileDto;
-import com.example.gread.app.mypage.entity.Review;
-import com.example.gread.app.mypage.entity.User;
-import com.example.gread.app.mypage.repository.ReviewRepository;
-import com.example.gread.app.mypage.repository.UserRepository;
+import com.example.gread.app.review.domain.Review;
+import com.example.gread.app.login.domain.User;
+import com.example.gread.app.review.repository.ReviewRepository;
+import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +34,14 @@ public class UserServiceImpl implements UserService {
     public UserProfileDto updateMyProfile(String email, UpdateUserRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        if (request.getNickname() != null) {
-            user.setNickname(request.getNickname());
-        }
-        if (request.getProfileImageUrl() != null) {
-            user.setProfileImageUrl(request.getProfileImageUrl());
+        
+        if (user.getProfile() != null) {
+            if (request.getNickname() != null) {
+                user.getProfile().setNickname(request.getNickname());
+            }
+            if (request.getProfileImageUrl() != null) {
+                user.getProfile().setProfileImageUrl(request.getProfileImageUrl());
+            }
         }
         return toDto(user);
     }
@@ -56,9 +59,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Page<Review> reviews = reviewRepository.findByUser(user, pageable);
         return reviews.map(r -> ReviewDto.builder()
-                .reviewId(r.getId())
+                .reviewId(r.getReviewId())
                 .title(r.getTitle())
-                .content(r.getContent())
+                .content(r.getReviewContent())
                 .build());
     }
 
@@ -66,9 +69,9 @@ public class UserServiceImpl implements UserService {
         return UserProfileDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .nickname(user.getNickname())
-                .readerType(user.getReaderType())
-                .profileImageUrl(user.getProfileImageUrl())
+                .nickname(user.getProfile() != null ? user.getProfile().getNickname() : null)
+                .readerType(user.getReaderType() != null ? user.getReaderType().name() : null)
+                .profileImageUrl(user.getProfile() != null ? user.getProfile().getProfileImageUrl() : null)
                 .build();
     }
 }
