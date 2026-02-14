@@ -49,9 +49,9 @@ public class ReviewController {
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getMyReviews(
             Authentication authentication
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long profileId = Long.parseLong(authentication.getName());
 
-        List<ReviewResDto> reviews = reviewService.findReviewByProfileId(userId);
+        List<ReviewResDto> reviews = reviewService.findReviewByProfileId(profileId);
         return ApiResponseTemplate.success(SuccessCode.OK, reviews);
     }
 
@@ -81,10 +81,10 @@ public class ReviewController {
             @PathVariable Long reviewId,
             @Valid @RequestBody ReviewReqDto dto
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long profileId = Long.parseLong(authentication.getName());
 
         ReviewResDto updatedReview =
-                reviewService.updateReview(dto, reviewId, userId);
+                reviewService.updateReview(dto, reviewId, profileId);
 
         return ApiResponseTemplate.success(SuccessCode.OK, updatedReview);
     }

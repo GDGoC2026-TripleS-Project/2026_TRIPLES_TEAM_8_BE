@@ -1,8 +1,11 @@
 package com.example.gread.app.ranking.service;
 
+import com.example.gread.app.login.domain.Profile;
+import com.example.gread.app.login.repository.ProfileRepository;
 import com.example.gread.app.ranking.domain.Ranking;
 import com.example.gread.app.ranking.dto.RankingResDto;
 import com.example.gread.app.ranking.repository.RankingRepository;
+import com.example.gread.app.review.repository.ReviewRepository;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import java.util.List;
 public class RankingService {
 
     private final RankingRepository rankingRepository;
+    private final ReviewRepository reviewRepository;
+    private final ProfileRepository profileRepository;
 
     @Transactional(readOnly = true)
     public List<RankingResDto> getTop5() {
@@ -58,6 +63,22 @@ public class RankingService {
             }
         }
 
-        throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        /* 리뷰가 하나도 없어서 랭킹을 못 매기는 경우 */
+
+        Profile profile = profileRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        long reviewCount = reviewRepository.countByProfileId(userId);
+
+        return RankingResDto.builder()
+                .nickname(profile.getNickname())
+                .reviewCount(reviewCount)
+                .rank(0)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Long getReviewCountByProfileId(Long profileId) {
+        return reviewRepository.countByProfileId(profileId);
     }
 }

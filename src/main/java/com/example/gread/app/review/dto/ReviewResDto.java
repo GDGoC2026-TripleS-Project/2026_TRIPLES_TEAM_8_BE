@@ -33,7 +33,7 @@ public class ReviewResDto {
         long createdTimeAgo = 0;
 
         if (createdAt != null) {
-            createdTimeAgo = Duration.between(createdAt, LocalDateTime.now()).toHours();
+                createdTimeAgo = Duration.between(createdAt, LocalDateTime.now()).toHours();
         }
 
         return ReviewResDto.builder()
@@ -42,7 +42,7 @@ public class ReviewResDto {
                 .userId(review.getProfile().getId())
                 .bookId(review.getBook().getId())
                 .nickname(review.getProfile().getNickname())
-//                .profileImageUrl(review.getProfile().getProfileImageUrl())
+                .profileImageUrl(review.getProfile().getProfileImageUrl())
                 .reviewColor(review.getReviewColor())
                 .reviewContent(review.getReviewContent())
                 .createdAt(review.getCreatedAt())

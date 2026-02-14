@@ -2,10 +2,8 @@ package com.example.gread.app.review.service;
 
 import com.example.gread.app.login.domain.Book;
 import com.example.gread.app.login.domain.Profile;
-import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.repository.BookRepository;
 import com.example.gread.app.login.repository.ProfileRepository;
-import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.app.ranking.domain.Ranking;
 import com.example.gread.app.ranking.repository.RankingRepository;
 import com.example.gread.app.review.domain.Review;
@@ -28,7 +26,6 @@ public class ReviewService {
     private final ProfileRepository profileRepository;
     private final BookRepository bookRepository;
     private final RankingRepository rankingRepository;
-    private final UserRepository userRepository;
 
     @Transactional
     public ReviewResDto postReview(ReviewReqDto dto, Long profileId, Long bookId) {
