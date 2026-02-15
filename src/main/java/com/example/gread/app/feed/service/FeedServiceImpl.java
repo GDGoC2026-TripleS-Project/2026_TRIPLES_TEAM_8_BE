@@ -28,6 +28,7 @@ public class FeedServiceImpl implements FeedService {
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
                 .thumbnailUrl(book.getThumbnailUrl())
+
                 .keyword1(book.getKeyword1())
                 .keyword2(book.getKeyword2())
                 .build();

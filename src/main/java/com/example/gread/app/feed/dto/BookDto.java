@@ -15,6 +15,7 @@ public class BookDto {
     private String author;
     private String publisher;
     private String thumbnailUrl;
+
     private String keyword1;
     private String keyword2;
 }

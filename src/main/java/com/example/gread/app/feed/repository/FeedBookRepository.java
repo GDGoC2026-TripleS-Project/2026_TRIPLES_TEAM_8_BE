@@ -10,3 +10,4 @@ import org.springframework.stereotype.Repository;
 public interface FeedBookRepository extends JpaRepository<Book, Long> {
     Page<Book> findByTitleContainingIgnoreCaseOrKeyword1ContainingIgnoreCaseOrKeyword2ContainingIgnoreCase(String title, String keyword1, String keyword2, Pageable pageable);
 }
+
