@@ -32,6 +32,9 @@ public class Ranking extends BaseTimeEntity {
     @Column(name = "ranking_position")
     private long rank;
 
+    @Column
+    private boolean top5;
+
     public Ranking(Profile profile, long reviewCount, long rank) {
         this.profile = profile;
         this.reviewCount = reviewCount;

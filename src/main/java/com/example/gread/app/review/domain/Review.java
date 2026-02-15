@@ -14,12 +14,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jdk.jfr.Category;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -53,10 +49,6 @@ public class Review extends BaseTimeEntity{
 
     @Column
     private String category;
-
-    @Column(nullable = false, updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
 
     public Review(Profile profile, Book book, ReviewColor reviewColor, String reviewContent, String category) {
         this.profile = profile;
