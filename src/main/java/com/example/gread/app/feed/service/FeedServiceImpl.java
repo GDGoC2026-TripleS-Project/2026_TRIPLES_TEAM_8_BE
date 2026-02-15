@@ -17,7 +17,7 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public Page<BookDto> getBooks(String category, String keyword, Pageable pageable) {
         // 현재 category 필터는 미적용, 키워드와 제목에 대해 검색
-        Page<Book> books = bookRepository.findByTitleContainingIgnoreCaseOrKeywordsContainingIgnoreCase(keyword, keyword, pageable);
+        Page<Book> books = bookRepository.findByTitleContainingIgnoreCaseOrKeyword1ContainingIgnoreCaseOrKeyword2ContainingIgnoreCase(keyword, keyword, keyword, pageable);
         return books.map(this::toDto);
     }
 
@@ -28,7 +28,8 @@ public class FeedServiceImpl implements FeedService {
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
                 .thumbnailUrl(book.getThumbnailUrl())
-                .keywords(book.getKeywords())
+                .keyword1(book.getKeyword1())
+                .keyword2(book.getKeyword2())
                 .build();
     }
 }

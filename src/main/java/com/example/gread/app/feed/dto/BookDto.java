@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Builder
 @AllArgsConstructor
@@ -17,5 +15,6 @@ public class BookDto {
     private String author;
     private String publisher;
     private String thumbnailUrl;
-    private List<String> keywords;
+    private String keyword1;
+    private String keyword2;
 }
