@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Getter
-@Setter // 업데이트를 위해 추가
+@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -29,7 +29,6 @@ public class User {
     @Column(name = "google_sub", nullable = false)
     private String googleSub;
 
-    // 닉네임 대신 구글 기본 이름을 저장 (중복 허용)
     @Column(nullable = false)
     private String name;
 
@@ -41,17 +40,23 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // mappedBy 확인
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
+
+    @Column
+    private String profileImageUrl;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
 
-    public void updateOnboarding(String newNickname, ReaderType readerType) {
+    public void completeOnboarding(String nickname, ReaderType readerType) {
         this.readerType = readerType;
+        this.role = Role.USER;
+
         if (this.profile != null) {
-            this.profile.setNickname(newNickname);
+            this.profile.setNickname(nickname);
+            this.profile.setTestResultCode(readerType.getTestResultCode());
         }
     }
 }

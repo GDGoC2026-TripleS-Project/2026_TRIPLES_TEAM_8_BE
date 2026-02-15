@@ -27,7 +27,7 @@ public class UserController {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        user.updateOnboarding(request.getNickname(), ReaderType.valueOf(request.getReaderType()));
+        user.completeOnboarding(request.getNickname(), ReaderType.valueOf(request.getReaderType()));
         userRepository.save(user);
 
         return ResponseEntity.ok("온보딩 완료!");

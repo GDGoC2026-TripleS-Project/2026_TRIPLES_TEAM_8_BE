@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 public class OnboardingRequestDto {
@@ -12,4 +14,6 @@ public class OnboardingRequestDto {
     private String nickname;
     private String readerType;
     private String testResultCode;
+
+    private List<String> preferenceTags;
 }
