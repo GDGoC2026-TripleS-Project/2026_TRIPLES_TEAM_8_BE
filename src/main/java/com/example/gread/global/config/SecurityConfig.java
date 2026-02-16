@@ -27,7 +27,6 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,9 +39,6 @@ public class SecurityConfig {
 
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                )
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 요청 허용
@@ -56,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/onboarding").authenticated() // 온보딩은 로그인 필수
 
                         .anyRequest().authenticated() // 나머지는 인증 필요
-                        )
+                )
 
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
