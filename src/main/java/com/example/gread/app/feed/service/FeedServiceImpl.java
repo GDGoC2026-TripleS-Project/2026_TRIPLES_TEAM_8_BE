@@ -1,13 +1,13 @@
 package com.example.gread.app.feed.service;
 
-import com.example.gread.app.feed.dto.BookDto;
-import com.example.gread.app.feed.entity.Book;
+import com.example.gread.app.bookDetail.domain.Book;
+import com.example.gread.app.bookDetail.dto.BookDetailResponse;
 import com.example.gread.app.feed.repository.FeedBookRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,33 +16,30 @@ public class FeedServiceImpl implements FeedService {
     private final FeedBookRepository bookRepository;
 
     @Override
-    public Page<BookDto> getBooks(String category, String keyword, Pageable pageable) {
-        Page<Book> books;
-        if (StringUtils.hasText(keyword)) {
-            books = bookRepository.findByKeyword(keyword, pageable);
-        } else {
-            books = bookRepository.findAll(pageable);
-        }
-        return books.map(this::toDto);
+    @Transactional(readOnly = true)
+    public List<BookDetailResponse> getBooks(String category, String keyword) {
+        // "전체" 혹은 빈 값일 때 필터 해제
+        String filterCategory = (category == null || category.isEmpty() || category.equals("전체")) ? null : category;
+        return bookRepository.findByFilters(filterCategory, keyword).stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Override
-    public Page<BookDto> getMyFeed(Long userId, Pageable pageable) {
-        // TODO: 사용자 관심사에 맞는 도서 추천 로직 구현
-        // 현재는 전체 도서 목록 반환
-        Page<Book> books = bookRepository.findAll(pageable);
-        return books.map(this::toDto);
+    @Transactional(readOnly = true)
+    public List<BookDetailResponse> getMyFeed(Long userId) {
+        return bookRepository.findAll().stream().map(this::toDto).toList();
     }
 
-    private BookDto toDto(Book book) {
-        return BookDto.builder()
+    private BookDetailResponse toDto(Book book) {
+        return BookDetailResponse.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
-                .thumbnailUrl(book.getThumbnailUrl())
                 .keyword1(book.getKeyword1())
                 .keyword2(book.getKeyword2())
+                .majorName(book.getMajorName())
                 .build();
     }
 }
