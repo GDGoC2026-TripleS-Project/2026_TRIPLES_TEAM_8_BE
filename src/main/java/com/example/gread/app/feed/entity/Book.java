@@ -1,5 +1,6 @@
 package com.example.gread.app.feed.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "books")
+@Table(name = "feed_books")
 public class Book {
 
     @Id
@@ -25,7 +26,13 @@ public class Book {
     private String title;
     private String author;
     private String publisher;
+    
+    @Column(name = "thumbnail_url")
     private String thumbnailUrl;
+    
+    @Column(name = "keyword1")
     private String keyword1;
+    
+    @Column(name = "keyword2")
     private String keyword2;
 }

@@ -24,15 +24,15 @@ public class UserServiceImpl implements UserService {
     private final ReviewRepository reviewRepository;
 
     @Override
-    public UserProfileDto getMyProfile(String email) {
-        User user = userRepository.findByEmail(email)
+    public UserProfileDto getMyProfile(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return toDto(user);
     }
 
     @Override
-    public UserProfileDto updateMyProfile(String email, UpdateUserRequest request) {
-        User user = userRepository.findByEmail(email)
+    public UserProfileDto updateMyProfile(Long userId, UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         
         if (user.getProfile() != null) {
@@ -47,15 +47,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteMyAccount(String email) {
-        User user = userRepository.findByEmail(email)
+    public void deleteMyAccount(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         userRepository.delete(user);
     }
 
     @Override
-    public Page<ReviewDto> getMyReviews(String email, Pageable pageable) {
-        User user = userRepository.findByEmail(email)
+    public Page<ReviewDto> getMyReviews(Long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Page<Review> reviews = reviewRepository.findByUser(user, pageable);
         return reviews.map(r -> ReviewDto.builder()

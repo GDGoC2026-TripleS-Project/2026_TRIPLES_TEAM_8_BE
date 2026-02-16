@@ -7,8 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-    UserProfileDto getMyProfile(String email);
-    UserProfileDto updateMyProfile(String email, UpdateUserRequest request);
-    void deleteMyAccount(String email);
-    Page<ReviewDto> getMyReviews(String email, Pageable pageable);
+    UserProfileDto getMyProfile(Long userId);
+    UserProfileDto updateMyProfile(Long userId, UpdateUserRequest request);
+    void deleteMyAccount(Long userId);
+    Page<ReviewDto> getMyReviews(Long userId, Pageable pageable);
 }

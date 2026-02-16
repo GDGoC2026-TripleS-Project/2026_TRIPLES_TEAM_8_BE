@@ -6,4 +6,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface FeedService {
     Page<BookDto> getBooks(String category, String keyword, Pageable pageable);
+    Page<BookDto> getMyFeed(Long userId, Pageable pageable);
 }
