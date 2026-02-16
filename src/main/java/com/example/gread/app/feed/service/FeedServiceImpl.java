@@ -39,6 +39,7 @@ public class FeedServiceImpl implements FeedService {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
+                .majorName(book.getMajorName())
                 .keyword1(book.getKeyword1())
                 .keyword2(book.getKeyword2())
                 .build();
