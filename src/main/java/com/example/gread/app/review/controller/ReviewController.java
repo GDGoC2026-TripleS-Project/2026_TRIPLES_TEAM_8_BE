@@ -39,12 +39,10 @@ public class ReviewController {
             @PathVariable Long bookId,
             @Valid @RequestBody ReviewReqDto dto
     ) {
-
-        Long profileId = Long.parseLong(authentication.getName());
-
-        if (authentication == null) {
+        if (authentication == null || authentication.getName().equals("anonymousUser")) {
             throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
         }
+        Long profileId = Long.parseLong(authentication.getName());
 
         ReviewResDto review = reviewService.postReview(dto, profileId, bookId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_CREATED, review);
@@ -55,11 +53,10 @@ public class ReviewController {
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getMyReviews(
             Authentication authentication
     ) {
-        Long profileId = Long.parseLong(authentication.getName());
-
-        if (authentication == null) {
+        if (authentication == null || authentication.getName().equals("anonymousUser")) {
             throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
         }
+        Long profileId = Long.parseLong(authentication.getName());
 
         List<ReviewResDto> reviews = reviewService.findReviewByProfileId(profileId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
@@ -91,11 +88,10 @@ public class ReviewController {
             @PathVariable Long reviewId,
             @Valid @RequestBody ReviewReqDto dto
     ) {
-        Long profileId = Long.parseLong(authentication.getName());
-
-        if (authentication == null) {
+        if (authentication == null || authentication.getName().equals("anonymousUser")) {
             throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
         }
+        Long profileId = Long.parseLong(authentication.getName());
 
         ReviewResDto updatedReview =
                 reviewService.updateReview(dto, reviewId, profileId);
@@ -120,11 +116,10 @@ public class ReviewController {
             Authentication authentication,
             @PathVariable Long reviewId
     ) {
-        Long profileId = Long.parseLong(authentication.getName());
-
-        if (authentication == null) {
+        if (authentication == null || authentication.getName().equals("anonymousUser")) {
             throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
         }
+        Long profileId = Long.parseLong(authentication.getName());
 
         reviewService.deleteReviewById(reviewId, profileId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETED, null);

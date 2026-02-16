@@ -2,7 +2,9 @@ package com.example.gread.app.feed.controller;
 
 import com.example.gread.app.feed.dto.BookDto;
 import com.example.gread.app.feed.service.FeedService;
+import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.code.SuccessCode;
+import com.example.gread.global.exception.BusinessException;
 import com.example.gread.global.responseTemplate.ApiResponseTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,10 +64,14 @@ public class FeedController {
     })
     @GetMapping
     public ResponseEntity<ApiResponseTemplate<Page<BookDto>>> getMyFeed(
-            @Parameter(hidden = true) @AuthenticationPrincipal String userId,
+            Authentication authentication,
             @Parameter(description = "페이징 정보")
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        return ApiResponseTemplate.success(SuccessCode.OK, feedService.getMyFeed(Long.parseLong(userId), pageable));
+        if (authentication == null || authentication.getName().equals("anonymousUser")) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
+        Long userId = Long.parseLong(authentication.getName());
+        return ApiResponseTemplate.success(SuccessCode.OK, feedService.getMyFeed(userId, pageable));
     }
 }
