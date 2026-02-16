@@ -1,5 +1,6 @@
-package com.example.gread.app.bookDetail;
+package com.example.gread.app.bookDetail.dto;
 
+import com.example.gread.app.bookDetail.domain.Book;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class BookDetailResponse {
      */
     public static BookDetailResponse from(Book book) {
         return BookDetailResponse.builder()
-                .bookId(book.getBookId())
+                .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())

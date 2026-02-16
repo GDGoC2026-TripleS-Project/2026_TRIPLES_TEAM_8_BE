@@ -1,0 +1,18 @@
+package com.example.gread.app.bookDetail.repository;
+
+import com.example.gread.app.bookDetail.domain.Book;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface BookRepository extends JpaRepository<Book, Long> {
+
+    List<Book> findByMajorCategory(String majorCategory);
+
+    List<Book> findByCategoryCode(Integer categoryCode);
+
+    List<Book> findByCategoryCodeIn(List<Integer> categoryCodes);
+
+}

@@ -1,5 +1,8 @@
-package com.example.gread.app.bookDetail;
+package com.example.gread.app.bookDetail.service;
 
+import com.example.gread.app.bookDetail.dto.BookDetailResponse;
+import com.example.gread.app.bookDetail.domain.Book;
+import com.example.gread.app.bookDetail.repository.BookRepository;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.exception.BusinessException; // 팀에서 사용하는 커스텀 예외 클래스
 import lombok.RequiredArgsConstructor;

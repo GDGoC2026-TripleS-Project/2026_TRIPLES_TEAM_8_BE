@@ -1,5 +1,7 @@
-package com.example.gread.app.bookDetail;
+package com.example.gread.app.bookDetail.controller;
 
+import com.example.gread.app.bookDetail.dto.BookDetailResponse;
+import com.example.gread.app.bookDetail.service.BookService;
 import com.example.gread.global.code.SuccessCode;
 import com.example.gread.global.responseTemplate.ApiResponseTemplate;
 import lombok.RequiredArgsConstructor;

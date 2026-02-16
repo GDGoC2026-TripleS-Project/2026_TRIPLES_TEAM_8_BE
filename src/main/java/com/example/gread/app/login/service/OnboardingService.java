@@ -2,8 +2,10 @@ package com.example.gread.app.login.service;
 
 import com.example.gread.app.home.domain.ReaderType;
 import com.example.gread.app.home.dto.OnboardingResponseDto;
-import com.example.gread.app.home.dto.OnboardingRequestDto;
+import com.example.gread.app.login.domain.Profile;
 import com.example.gread.app.login.domain.User;
+import com.example.gread.app.login.dto.OnboardingRequestDto;
+import com.example.gread.app.login.repository.ProfileRepository;
 import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.exception.BusinessException;
@@ -12,81 +14,60 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OnboardingService {
 
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
 
     @Transactional
     public OnboardingResponseDto updateOnboarding(String subject, OnboardingRequestDto request) {
-        User user = findUserBySubject(subject);
-
-        String newNickname = request.getNickname();
-        String currentNickname = Optional.ofNullable(user.getProfile())
-                .map(p -> p.getNickname())
-                .orElse("");
-
-        if (newNickname != null && !newNickname.equals(currentNickname)) {
-            if (userRepository.existsByProfileNickname(newNickname)) {
-                throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
-            }
-        }
-
-        ReaderType readerType = determineReaderType(request.getReaderType());
-
-        user.completeOnboarding(newNickname, readerType);
-
-        if (request.getPreferenceTags() != null && !request.getPreferenceTags().isEmpty() && user.getProfile() != null) {
-            user.getProfile().setPreferenceTags(String.join(", ", request.getPreferenceTags()));
-        }
-
-        log.info("### 온보딩 완료 성공: UserEmail = {}, Role = {}", user.getEmail(), user.getRole());
-
-        int recommendedCode = getFirstCategoryCode(readerType);
-
-        return OnboardingResponseDto.builder()
-                .readerType(readerType.name())
-                .readerTitle(readerType.getTitle())
-                .descriptionLines(readerType.getDescriptionLines())
-                .recommendedCategoryCode(recommendedCode)
-                .build();
-    }
-
-    private ReaderType determineReaderType(String typeStr) {
-        if (typeStr == null || typeStr.isBlank()) {
-            return ReaderType.TYPE_A; // 기본값
-        }
-        try {
-            return ReaderType.valueOf(typeStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("### 잘못된 ReaderType 요청 [{}], TYPE_A로 기본 설정합니다.", typeStr);
-            return ReaderType.TYPE_A;
-        }
-    }
-
-    private int getFirstCategoryCode(ReaderType readerType) {
-        return Optional.ofNullable(readerType.getCategoryCodes())
-                .filter(codes -> !codes.isEmpty())
-                .map(codes -> codes.get(0))
-                .orElse(0);
-    }
-
-    private User findUserBySubject(String subject) {
-        if (subject == null || subject.isBlank()) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-        }
-
+        User user;
         try {
             Long userId = Long.parseLong(subject);
-            return userRepository.findById(userId)
+            user = userRepository.findById(userId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         } catch (NumberFormatException e) {
-            return userRepository.findByEmail(subject)
+            user = userRepository.findByEmail(subject)
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         }
+
+        Profile profile = user.getProfile();
+        if (profile == null) {
+            log.info("### Profile이 없어 새로 생성합니다. User ID: {}", user.getId());
+            profile = Profile.builder()
+                    .user(user)
+                    .nickname("GUEST_" + java.util.UUID.randomUUID().toString().substring(0, 8))
+                    .build();
+            profileRepository.save(profile);
+            user.setProfile(profile);
+        }
+
+        if (user.getReaderType() != null && profile.getNickname() != null) {
+            log.info("### 이미 온보딩을 완료한 유저입니다. User ID: {}", user.getId());
+        }
+
+        if (!request.getNickname().equals(profile.getNickname()) &&
+                userRepository.existsByProfileNickname(request.getNickname())) {
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        profile.setNickname(request.getNickname());
+        profile.setTestResultCode(request.getTestResultCode());
+        profile.setPreferenceTags(request.getPreferenceTags());
+
+        try {
+            String typeStr = request.getReaderType() != null ? request.getReaderType() : "TYPE_A";
+            user.setReaderType(ReaderType.valueOf(typeStr.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            log.warn("### 유효하지 않은 ReaderType: {}. 기본값 TYPE_A로 설정합니다.", request.getReaderType());
+            user.setReaderType(ReaderType.TYPE_A);
+        }
+
+        log.info("### 온보딩 정보 업데이트 성공. User ID: {}", user.getId());
+
+        return null;
     }
 }

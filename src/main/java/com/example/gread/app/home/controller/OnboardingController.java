@@ -1,7 +1,7 @@
 package com.example.gread.app.home.controller;
 
 import com.example.gread.app.home.dto.OnboardingResponseDto;
-import com.example.gread.app.home.dto.OnboardingRequestDto;
+import com.example.gread.app.login.dto.OnboardingRequestDto;
 import com.example.gread.app.login.service.OnboardingService;
 import com.example.gread.global.code.SuccessCode;
 import com.example.gread.global.responseTemplate.ApiResponseTemplate;

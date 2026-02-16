@@ -1,8 +1,7 @@
 package com.example.gread.app.home.domain;
 
+import com.example.gread.app.bookDetail.domain.Book;
 import com.example.gread.app.login.domain.User;
-import com.example.gread.app.login.domain.Book;
-import com.example.gread.app.home.domain.ReaderType;
 import jakarta.persistence.*;
 import lombok.*;
 
