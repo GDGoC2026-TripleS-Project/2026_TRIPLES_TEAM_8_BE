@@ -1,8 +1,8 @@
 package com.example.gread.app.feed.service;
 
 import com.example.gread.app.bookDetail.domain.Book;
-import com.example.gread.app.feed.dto.FeedResponse;
 import com.example.gread.app.bookDetail.repository.BookRepository;
+import com.example.gread.app.feed.dto.FeedResponse;
 import com.example.gread.app.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,17 @@ public class FeedService {
     private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getAllBooksForMain() {
-        // 1. 모든 도서 조회
-        List<Book> books = bookRepository.findAll();
+    public List<FeedResponse> getAllBooksForMain(String majorName) {
+        List<Book> books;
 
-        // 2. 루프를 돌며 각 도서 엔티티 + 리뷰 개수를 DTO로 변환
+        // majorName이 없거나, "전체"라는 텍스트가 들어오면 전체 조회
+        if (majorName == null || majorName.isEmpty() || majorName.equals("전체")) {
+            books = bookRepository.findAll();
+        } else {
+            // 특정 카테고리(창작, 에세이 등)가 들어오면 필터링 조회
+            books = bookRepository.findByMajorName(majorName);
+        }
+
         return books.stream()
                 .map(book -> {
                     long count = reviewRepository.countByBookId(book.getId());
