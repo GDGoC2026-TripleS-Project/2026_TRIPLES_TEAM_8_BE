@@ -10,7 +10,7 @@ public interface RankingRepository extends JpaRepository<Ranking,Long> {
 
     Optional<Ranking> findRankingByProfileId(Long userId);
 
-    List<Ranking> findTop5ByOrderByReviewCountDesc();
+    List<Ranking> findTop5ByReviewCountGreaterThanOrderByReviewCountDesc(long count);
 
     List<Ranking> findAllByOrderByReviewCountDesc();
 }

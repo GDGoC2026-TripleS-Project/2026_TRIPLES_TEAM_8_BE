@@ -6,6 +6,7 @@ import com.example.gread.app.login.repository.BookRepository;
 import com.example.gread.app.login.repository.ProfileRepository;
 import com.example.gread.app.ranking.domain.Ranking;
 import com.example.gread.app.ranking.repository.RankingRepository;
+import com.example.gread.app.ranking.service.RankingService;
 import com.example.gread.app.review.domain.Review;
 import com.example.gread.app.review.dto.ReviewReqDto;
 import com.example.gread.app.review.dto.ReviewResDto;
@@ -26,6 +27,7 @@ public class ReviewService {
     private final ProfileRepository profileRepository;
     private final BookRepository bookRepository;
     private final RankingRepository rankingRepository;
+    private final RankingService rankingService;
 
     @Transactional
     public ReviewResDto postReview(ReviewReqDto dto, Long profileId, Long bookId) {
@@ -121,5 +123,7 @@ public class ReviewService {
         ranking.decreaseReviewCount(); // 삭제이므로 감소
 
         reviewRepository.delete(review);
+
+        rankingService.updateRanking();
     }
 }
