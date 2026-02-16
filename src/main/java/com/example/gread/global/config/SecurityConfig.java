@@ -48,14 +48,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 요청 허용
                         .requestMatchers(
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/swagger-resources/**", "/webjars/**",
-                                "/", "/index.html", "/auth/**", "/oauth2/**",
-                                "/api/home/**",
-                                "/api/login/onboarding",
-                                "/api/feed/explore"
-                        ).permitAll()
+                                "/swagger-resources/**", "/webjars/**"
+                        ).permitAll() // Swagger 관련 경로 허용
+                        .requestMatchers("/", "/index.html", "/auth/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/api/home/**").permitAll() // 홈 화면은 비로그인 허용
+
+                        .requestMatchers("/api/onboarding").authenticated() // 온보딩은 로그인 필수
+
                         .anyRequest().authenticated() // 나머지는 인증 필요
-                )
+                        )
 
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
