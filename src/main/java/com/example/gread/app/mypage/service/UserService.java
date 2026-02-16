@@ -1,6 +1,6 @@
 package com.example.gread.app.mypage.service;
 
-import com.example.gread.app.mypage.dto.ReviewDto;
+import com.example.gread.app.review.dto.ReviewResDto;
 import com.example.gread.app.mypage.dto.UpdateUserRequest;
 import com.example.gread.app.mypage.dto.UserProfileDto;
 import org.springframework.data.domain.Page;
@@ -10,5 +10,5 @@ public interface UserService {
     UserProfileDto getMyProfile(Long userId);
     UserProfileDto updateMyProfile(Long userId, UpdateUserRequest request);
     void deleteMyAccount(Long userId);
-    Page<ReviewDto> getMyReviews(Long userId, Pageable pageable);
+    Page<ReviewResDto> getMyReviews(Long userId, Pageable pageable);
 }
