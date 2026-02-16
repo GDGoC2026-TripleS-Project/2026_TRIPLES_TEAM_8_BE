@@ -1,3 +1,4 @@
+/*
 package com.example.gread.app.feed.entity;
 
 import jakarta.persistence.Column;
@@ -36,3 +37,4 @@ public class Book {
     @Column(name = "keyword2")
     private String keyword2;
 }
+*/
