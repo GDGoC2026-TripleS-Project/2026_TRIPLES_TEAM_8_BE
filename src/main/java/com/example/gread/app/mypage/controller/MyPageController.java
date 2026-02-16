@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/users/me")
+@RequestMapping("/api/users/me")
 @RequiredArgsConstructor
 @Tag(name = "MyPage", description = "내 정보 및 내가 쓴 리뷰 API")
 public class MyPageController {
@@ -43,8 +43,8 @@ public class MyPageController {
     })
     @GetMapping
     public ResponseEntity<ApiResponseTemplate<UserProfileDto>> getMyInfo(
-            @Parameter(hidden = true) @AuthenticationPrincipal(expression = "username") String email) {
-        return ApiResponseTemplate.success(SuccessCode.OK, userService.getMyProfile(email));
+            @Parameter(hidden = true) @AuthenticationPrincipal String userId) {
+        return ApiResponseTemplate.success(SuccessCode.OK, userService.getMyProfile(Long.parseLong(userId)));
     }
 
     @Operation(summary = "내 정보 수정", description = "내 닉네임, 프로필 이미지 URL 등을 수정한다.")
@@ -55,9 +55,9 @@ public class MyPageController {
     })
     @PutMapping
     public ResponseEntity<ApiResponseTemplate<UserProfileDto>> updateMyInfo(
-            @Parameter(hidden = true) @AuthenticationPrincipal(expression = "username") String email,
+            @Parameter(hidden = true) @AuthenticationPrincipal String userId,
             @RequestBody UpdateUserRequest request) {
-        return ApiResponseTemplate.success(SuccessCode.OK, userService.updateMyProfile(email, request));
+        return ApiResponseTemplate.success(SuccessCode.OK, userService.updateMyProfile(Long.parseLong(userId), request));
     }
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자의 회원 탈퇴를 처리한다.")
@@ -67,22 +67,8 @@ public class MyPageController {
     })
     @DeleteMapping
     public ResponseEntity<ApiResponseTemplate<Void>> deleteMyAccount(
-            @Parameter(hidden = true) @AuthenticationPrincipal(expression = "username") String email) {
-        userService.deleteMyAccount(email);
+            @Parameter(hidden = true) @AuthenticationPrincipal String userId) {
+        userService.deleteMyAccount(Long.parseLong(userId));
         return ApiResponseTemplate.success(SuccessCode.OK, null);
-    }
-
-    @Operation(summary = "내가 쓴 리뷰 목록 조회", description = "내가 작성한 리뷰 목록을 페이징 조회한다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "리뷰 목록 조회 성공",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ApiResponseTemplate.class)))
-    })
-    @GetMapping("/reviews")
-    public ResponseEntity<ApiResponseTemplate<Page<ReviewDto>>> getMyReviews(
-            @Parameter(hidden = true) @AuthenticationPrincipal(expression = "username") String email,
-            @Parameter(description = "페이지 번호")
-            @PageableDefault(size = 10) Pageable pageable) {
-        return ApiResponseTemplate.success(SuccessCode.OK, userService.getMyReviews(email, pageable));
     }
 }

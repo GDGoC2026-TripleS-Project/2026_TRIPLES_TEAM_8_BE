@@ -43,9 +43,10 @@ public class SecurityConfig {
 
                         .requestMatchers("/", "/index.html", "/auth/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/home/**").permitAll()
+                        .requestMatchers("/api/feed/explore").permitAll() // explore는 인증 불필요
                         .requestMatchers("/api/login/onboarding").permitAll()
 
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // 나머지는 인증 필요 (api/feed 포함)
                 )
 
                 .oauth2Login(oauth2 -> oauth2
