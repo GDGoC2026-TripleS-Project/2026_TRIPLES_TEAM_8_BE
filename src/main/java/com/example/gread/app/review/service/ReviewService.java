@@ -46,7 +46,7 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(review);
 
-        /* 리뷰 추가 */
+        /* 리뷰 개수 증가 */
         Ranking ranking = rankingRepository.findRankingByProfileId(profileId)
                 .orElseGet(() -> {
                     long lowestRank = rankingRepository.count() + 1;
@@ -108,11 +108,17 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReviewById(Long reviewId, Long userId) {
+    public void deleteReviewById(Long reviewId, Long profileId) {
 
         Review review = reviewRepository
-                .findByReviewId(reviewId, userId)
+                .findByReviewId(reviewId, profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+
+        /* 리뷰 개수 감소 */
+        Ranking ranking = rankingRepository.findRankingByProfileId(profileId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RANKING_NOT_FOUND)); // 삭제라면 반드시 존재해야 함
+
+        ranking.decreaseReviewCount(); // 삭제이므로 감소
 
         reviewRepository.delete(review);
     }

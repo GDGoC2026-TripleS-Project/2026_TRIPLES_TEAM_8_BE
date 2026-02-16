@@ -45,6 +45,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/home/**").permitAll()
                         .requestMatchers("/api/login/onboarding").permitAll()
 
+                        .requestMatchers("/api/books/{bookId}/reviews").authenticated()
+                        .requestMatchers("/api/users/me/**").authenticated()
+                        .requestMatchers("/api/books/{bookId}/reviews/**").authenticated()
+                        .requestMatchers("/api/{bookId}/reviews/ranking/latest").authenticated()
                         .anyRequest().authenticated()
                 )
 

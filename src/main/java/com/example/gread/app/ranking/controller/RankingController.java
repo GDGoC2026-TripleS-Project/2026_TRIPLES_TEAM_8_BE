@@ -2,7 +2,9 @@ package com.example.gread.app.ranking.controller;
 
 import com.example.gread.app.ranking.dto.RankingResDto;
 import com.example.gread.app.ranking.service.RankingService;
+import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.code.SuccessCode;
+import com.example.gread.global.exception.BusinessException;
 import com.example.gread.global.responseTemplate.ApiResponseTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,6 +42,10 @@ public class RankingController {
 
         Long profileId = Long.parseLong(authentication.getName());
 
+        if (authentication == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
+
         RankingResDto myRanking = rankingService.getMyRanking(profileId);
 
         return ApiResponseTemplate.success(SuccessCode.RANKING_ME_OK, myRanking);
@@ -52,6 +58,10 @@ public class RankingController {
     ) {
 
         Long profileId = Long.parseLong(authentication.getName());
+
+        if (authentication == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
 
         long reviewCountByBook = rankingService.getReviewCountByProfileId(profileId);
 

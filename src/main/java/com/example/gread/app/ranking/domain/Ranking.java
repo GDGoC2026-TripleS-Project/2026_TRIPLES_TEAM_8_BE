@@ -46,6 +46,8 @@ public class Ranking extends BaseTimeEntity {
         this.reviewCount++;
     }
 
+    public void decreaseReviewCount() { this.reviewCount--; }
+
     public void updateRank(long rank) {
         this.rank = rank;
     }

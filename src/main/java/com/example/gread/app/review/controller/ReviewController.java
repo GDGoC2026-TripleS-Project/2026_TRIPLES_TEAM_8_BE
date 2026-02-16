@@ -3,7 +3,9 @@ package com.example.gread.app.review.controller;
 import com.example.gread.app.review.dto.ReviewReqDto;
 import com.example.gread.app.review.dto.ReviewResDto;
 import com.example.gread.app.review.service.ReviewService;
+import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.code.SuccessCode;
+import com.example.gread.global.exception.BusinessException;
 import com.example.gread.global.responseTemplate.ApiResponseTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,6 +42,10 @@ public class ReviewController {
 
         Long profileId = Long.parseLong(authentication.getName());
 
+        if (authentication == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
+
         ReviewResDto review = reviewService.postReview(dto, profileId, bookId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_CREATED, review);
     }
@@ -50,6 +56,10 @@ public class ReviewController {
             Authentication authentication
     ) {
         Long profileId = Long.parseLong(authentication.getName());
+
+        if (authentication == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
 
         List<ReviewResDto> reviews = reviewService.findReviewByProfileId(profileId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
@@ -83,6 +93,10 @@ public class ReviewController {
     ) {
         Long profileId = Long.parseLong(authentication.getName());
 
+        if (authentication == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
+
         ReviewResDto updatedReview =
                 reviewService.updateReview(dto, reviewId, profileId);
 
@@ -107,6 +121,10 @@ public class ReviewController {
             @PathVariable Long reviewId
     ) {
         Long profileId = Long.parseLong(authentication.getName());
+
+        if (authentication == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
+        }
 
         reviewService.deleteReviewById(reviewId, profileId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETED, null);
