@@ -18,7 +18,7 @@ public class ReviewResDto {
     private Long bookId;
 
     private String nickname;
-    private String profileImageUrl;
+    private String testResultCode;
     private ReviewColor reviewColor;
     private String reviewContent;
 
@@ -42,7 +42,7 @@ public class ReviewResDto {
                 .userId(review.getProfile().getId())
                 .bookId(review.getBook().getId())
                 .nickname(review.getProfile().getNickname())
-                .profileImageUrl(review.getProfile().getProfileImageUrl())
+                .testResultCode(review.getProfile().getTestResultCode())
                 .reviewColor(review.getReviewColor())
                 .reviewContent(review.getReviewContent())
                 .createdAt(review.getCreatedAt())

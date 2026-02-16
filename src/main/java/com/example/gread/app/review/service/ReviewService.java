@@ -87,10 +87,10 @@ public class ReviewService {
     }
 
     @Transactional
-    public ReviewResDto updateReview(ReviewReqDto dto, Long reviewId, Long userId) {
+    public ReviewResDto updateReview(ReviewReqDto dto, Long reviewId, Long profileId) {
 
         Review review = reviewRepository
-                .findByReviewId(reviewId, userId)
+                .findByReviewId(reviewId, profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.update(

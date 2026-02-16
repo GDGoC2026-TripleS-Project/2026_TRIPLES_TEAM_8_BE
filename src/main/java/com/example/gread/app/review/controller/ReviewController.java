@@ -106,9 +106,9 @@ public class ReviewController {
             Authentication authentication,
             @PathVariable Long reviewId
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long profileId = Long.parseLong(authentication.getName());
 
-        reviewService.deleteReviewById(reviewId, userId);
+        reviewService.deleteReviewById(reviewId, profileId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETED, null);
     }
 }
