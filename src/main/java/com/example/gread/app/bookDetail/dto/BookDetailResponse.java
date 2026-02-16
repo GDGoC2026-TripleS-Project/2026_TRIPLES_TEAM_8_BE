@@ -22,11 +22,12 @@ public class BookDetailResponse {
     private String keyword1;
     private String keyword2;
     private String aiAnalysis;
+    long reviewCount;
 
     /**
      * Entity의 모든 컬럼 데이터를 DTO로 변환
      */
-    public static BookDetailResponse from(Book book) {
+    public static BookDetailResponse from(Book book,long reviewCount) {
         return BookDetailResponse.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
@@ -39,6 +40,7 @@ public class BookDetailResponse {
                 .keyword1(book.getKeyword1())
                 .keyword2(book.getKeyword2())
                 .aiAnalysis(book.getAiAnalysis())
+                .reviewCount(book.getReviews().size())
                 .build();
     }
 }
