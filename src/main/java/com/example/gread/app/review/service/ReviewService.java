@@ -1,8 +1,9 @@
 package com.example.gread.app.review.service;
 
-import com.example.gread.app.login.domain.Book;
+import com.example.gread.app.bookDetail.domain.Book;
+import com.example.gread.app.bookDetail.repository.BookRepository;
 import com.example.gread.app.login.domain.Profile;
-import com.example.gread.app.login.repository.BookRepository;
+
 import com.example.gread.app.login.repository.ProfileRepository;
 import com.example.gread.app.ranking.domain.Ranking;
 import com.example.gread.app.ranking.repository.RankingRepository;
@@ -43,7 +44,7 @@ public class ReviewService {
                 book,
                 dto.getReviewColor(),
                 dto.getReviewContent(),
-                book.getCategory()
+                book.getMinorName()
         );
 
         Review savedReview = reviewRepository.save(review);
@@ -92,7 +93,7 @@ public class ReviewService {
     public ReviewResDto updateReview(ReviewReqDto dto, Long reviewId, Long profileId) {
 
         Review review = reviewRepository
-                .findByReviewId(reviewId, profileId)
+                .findByReviewIdAndProfileId(reviewId, profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.update(
@@ -113,7 +114,7 @@ public class ReviewService {
     public void deleteReviewById(Long reviewId, Long profileId) {
 
         Review review = reviewRepository
-                .findByReviewId(reviewId, profileId)
+                .findByReviewIdAndProfileId(reviewId, profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
         /* 리뷰 개수 감소 */

@@ -1,6 +1,6 @@
 package com.example.gread.app.review.domain;
 
-import com.example.gread.app.login.domain.Book;
+import com.example.gread.app.bookDetail.domain.Book;
 import com.example.gread.app.login.domain.Profile;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.global.entity.BaseTimeEntity;
