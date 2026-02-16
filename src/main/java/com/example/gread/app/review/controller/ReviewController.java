@@ -41,7 +41,7 @@ public class ReviewController {
         Long profileId = Long.parseLong(authentication.getName());
 
         ReviewResDto review = reviewService.postReview(dto, profileId, bookId);
-        return ApiResponseTemplate.success(SuccessCode.OK, review);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_CREATED, review);
     }
 
     @Operation(summary = "내 리뷰 조회", description = "내 리뷰를 조회합니다.")
@@ -52,7 +52,7 @@ public class ReviewController {
         Long profileId = Long.parseLong(authentication.getName());
 
         List<ReviewResDto> reviews = reviewService.findReviewByProfileId(profileId);
-        return ApiResponseTemplate.success(SuccessCode.OK, reviews);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
     }
 
     @Operation(summary = "책 리뷰 조회", description = "책을 기반으로 리뷰를 조회합니다.")
@@ -61,7 +61,7 @@ public class ReviewController {
             @PathVariable Long bookId
     ) {
         List<ReviewResDto> reviews = reviewService.findReviewByBookId(bookId);
-        return ApiResponseTemplate.success(SuccessCode.OK, reviews);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
     }
 
     @Operation(summary = "최신순 책 리뷰 조회", description = "최신순으로 책 리뷰를 조회합니다.")
@@ -71,7 +71,7 @@ public class ReviewController {
     ) {
         List<ReviewResDto> reviews = reviewService.findLatestReviewsByBookId(bookId);
 
-        return ApiResponseTemplate.success(SuccessCode.OK, reviews);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
     }
 
     @Operation(summary = "리뷰 수정", description = "리뷰 색상과 리뷰 내용을 입력받아서 리뷰를 수정합니다.")
@@ -86,7 +86,7 @@ public class ReviewController {
         ReviewResDto updatedReview =
                 reviewService.updateReview(dto, reviewId, profileId);
 
-        return ApiResponseTemplate.success(SuccessCode.OK, updatedReview);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_UPDATED, updatedReview);
     }
 
     @Operation(summary = "책 리뷰 개수 조회", description = "책에 작성된 리뷰의 개수를 조회합니다.")
@@ -97,7 +97,7 @@ public class ReviewController {
 
         long reviewCountByBook = reviewService.getReviewCountByBook(bookId);
 
-        return ApiResponseTemplate.success(SuccessCode.OK, reviewCountByBook);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_COUNT_OK, reviewCountByBook);
     }
 
     @Operation(summary = "리뷰 삭제", description = "리뷰를 삭제합니다.")
@@ -109,6 +109,6 @@ public class ReviewController {
         Long userId = Long.parseLong(authentication.getName());
 
         reviewService.deleteReviewById(reviewId, userId);
-        return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETE_SUCCESS, null);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETED, null);
     }
 }
