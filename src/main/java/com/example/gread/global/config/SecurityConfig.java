@@ -1,7 +1,13 @@
 package com.example.gread.global.config;
 
-import com.example.gread.app.login.service.CustomOAuth2UserService;
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
+import com.example.gread.global.config.JwtAuthenticationEntryPoint;
+import com.example.gread.app.login.config.TokenProvider;
+import com.example.gread.app.login.domain.User;
+import com.example.gread.app.login.dto.TokenDto;
+import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.login.service.AuthService;
+import com.example.gread.app.login.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +33,10 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final TokenProvider tokenProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,30 +46,35 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
-
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 요청 허용
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/swagger-resources/**", "/webjars/**"
-                        ).permitAll() // Swagger 관련 경로 허용
-                        .requestMatchers("/", "/index.html", "/auth/**", "/oauth2/**").permitAll()
-                        .requestMatchers("/api/home/**").permitAll() // 홈 화면은 비로그인 허용
-
-                        .requestMatchers("/api/onboarding").authenticated() // 온보딩은 로그인 필수
-
-                        .anyRequest().authenticated() // 나머지는 인증 필요
+                                "/swagger-resources/**", "/webjars/**",
+                                "/", "/index.html"
+                        ).permitAll()
+                        .requestMatchers("/api/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 소셜 로그인 성공! 프론트엔드 온보딩 페이지로 이동합니다.");
-                            // 배포 시 이 주소를 환경변수나 실제 도메인으로 변경
-                            response.sendRedirect("http://localhost:3000/onboarding");
+                            log.info("### 구글 인증 성공! 토큰을 발급합니다.");
+
+                            String email = authentication.getName(); // CustomOAuth2UserService에서 설정한 key값(email)
+                            User user = userRepository.findByEmail(email)
+                                    .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+                            TokenDto tokenDto = tokenProvider.createToken(user.getId());
+                            authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
+
+                            String targetUrl = "http://localhost:3000/onboarding?token=" + tokenDto.getAccessToken();
+                            response.sendRedirect(targetUrl);
                         })
                 );
 
@@ -71,12 +86,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // 프론트엔드 주소 허용 (localhost:3000)
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization")); // 프론트에서 토큰을 읽을 수 있게 허용
+        configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
