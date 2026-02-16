@@ -72,11 +72,10 @@ public class ReviewController {
     }
 
     @Operation(summary = "최신순 책 리뷰 조회", description = "최신순으로 책 리뷰를 조회합니다.")
-    @GetMapping("{bookId}/reviews/ranking/latest")
+    @GetMapping("/reviews/ranking/latest")
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getLatestReviews(
-            @PathVariable Long bookId
     ) {
-        List<ReviewResDto> reviews = reviewService.findLatestReviewsByBookId(bookId);
+        List<ReviewResDto> reviews = reviewService.findLatestReviews();
 
         return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
     }
@@ -93,5 +92,15 @@ public class ReviewController {
         return ApiResponseTemplate.success(SuccessCode.REVIEW_COUNT_OK, reviewCountByBook);
     }
 
+    @Operation(summary = "리뷰 삭제", description = "마이페이지에서 본인이 작성한 리뷰를 삭제합니다.")
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<ApiResponseTemplate<Void>> deleteReview(
+            Authentication authentication,
+            @PathVariable Long reviewId
+    ) {
+        Long userId = Long.parseLong(authentication.getName());
 
+        reviewService.deleteReviewById(reviewId, userId);
+        return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETED, null);
+    }
 }

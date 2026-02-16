@@ -81,8 +81,8 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResDto> findLatestReviewsByBookId(Long bookId) {
-        List<Review> reviews = reviewRepository.findByBookIdOrderByCreatedAtDesc(bookId);
+    public List<ReviewResDto> findLatestReviews() {
+        List<Review> reviews = reviewRepository.findAllByOrderByCreatedAtDesc();
         return reviews.stream()
                 .map(ReviewResDto::from)
                 .toList();

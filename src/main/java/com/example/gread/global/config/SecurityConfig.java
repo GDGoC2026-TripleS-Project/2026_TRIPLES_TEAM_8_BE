@@ -54,7 +54,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/swagger-resources/**", "/webjars/**",
-                                "/", "/index.html"
+                                "/", "/index.html",
+                                "/api/reviews/{reviewId}", "/api/books/{bookId}/reviews", "/api/reviews/ranking/latest",
+                                "/api/reviews/ranking", "/api/books/{bookId}/reviews/count"
                         ).permitAll()
                         .requestMatchers("/api/login/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
