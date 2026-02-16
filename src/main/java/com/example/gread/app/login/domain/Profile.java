@@ -21,6 +21,8 @@ public class Profile {
 
     private String testResultCode; // 심리테스트 결과 (ex: 'TYPE_A')
     private String preferenceTags; // 선택 키워드 2개 저장
+    
+    private String profileImageUrl; // 프로필 이미지 URL
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
