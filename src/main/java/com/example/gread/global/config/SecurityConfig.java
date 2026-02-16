@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 요청 허용
                         .requestMatchers(
-                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/login",
                                 "/swagger-resources/**", "/webjars/**",
                                 "/", "/index.html", "/auth/**", "/oauth2/**",
                                 "/api/home/**",
