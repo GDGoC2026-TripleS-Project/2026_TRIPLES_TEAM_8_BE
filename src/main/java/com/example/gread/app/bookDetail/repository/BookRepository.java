@@ -9,10 +9,4 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    List<Book> findByMajorCategory(String majorCategory);
-
-    List<Book> findByCategoryCode(Integer categoryCode);
-
-    List<Book> findByCategoryCodeIn(List<Integer> categoryCodes);
-
 }

@@ -8,37 +8,35 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "books")
+@Table(name = "curated_books_final") // 실제 테이블명 매핑
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "book_id")
+    @Column(name = "book_id") // DB: book_id
     private Long id;
 
     @Column(nullable = false)
     private String title;
+
+    @Column(name = "original_title") // DB: original_title
+    private String originalTitle;
+
     private String author;
     private String publisher;
 
-    // 알라딘 API 및 상세 페이지용
-    @Column(columnDefinition = "TEXT")
-    private String description; // 줄거리 (알라딘 description/fullDescription 저장용)
+    @Column(name = "major_name") // DB: major_name -> majorName 필드와 매핑
+    private String majorName;
 
-    private String coverUrl;
-
-    private Integer categoryCode;
-
-    @Column(name = "major_category")
-    private String majorCategory;
-
+    @Column(name = "minor_code") // DB: minor_code
     private String minorCode;
+
+    @Column(name = "minor_name") // DB: minor_name
     private String minorName;
 
     private String keyword1;
     private String keyword2;
 
-    public void updateCategory(Integer newCategoryCode) {
-        this.categoryCode = newCategoryCode;
-    }
+    @Column(name = "ai_analysis", columnDefinition = "TEXT") // DB: ai_analysis 매핑
+    private String aiAnalysis;
 }
