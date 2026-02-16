@@ -14,6 +14,7 @@ public enum SuccessCode {
 
     // 추가된 도서 상세 조회 성공 코드
     GET_BOOK_SUCCESS(HttpStatus.OK, "도서 상세 정보 조회 성공"),
+    GET_BOOK_LIST_SUCCESS(HttpStatus.OK, "도서 목록 조회에 성공했습니다."),
 
     // 리뷰 관련
     REVIEW_OK(HttpStatus.OK, "리뷰 조회 성공"),

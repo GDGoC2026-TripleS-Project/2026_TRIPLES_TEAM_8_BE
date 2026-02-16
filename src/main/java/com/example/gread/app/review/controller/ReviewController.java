@@ -81,23 +81,6 @@ public class ReviewController {
         return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);
     }
 
-    @Operation(summary = "리뷰 수정", description = "리뷰 색상과 리뷰 내용을 입력받아서 리뷰를 수정합니다.")
-    @PatchMapping("/reviews/{reviewId}")
-    public ResponseEntity<ApiResponseTemplate<ReviewResDto>> updateReview(
-            Authentication authentication,
-            @PathVariable Long reviewId,
-            @Valid @RequestBody ReviewReqDto dto
-    ) {
-        if (authentication == null || authentication.getName().equals("anonymousUser")) {
-            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
-        }
-        Long profileId = Long.parseLong(authentication.getName());
-
-        ReviewResDto updatedReview =
-                reviewService.updateReview(dto, reviewId, profileId);
-
-        return ApiResponseTemplate.success(SuccessCode.REVIEW_UPDATED, updatedReview);
-    }
 
     @Operation(summary = "책 리뷰 개수 조회", description = "책에 작성된 리뷰의 개수를 조회합니다.")
     @GetMapping("/books/{bookId}/reviews/count")
@@ -110,18 +93,5 @@ public class ReviewController {
         return ApiResponseTemplate.success(SuccessCode.REVIEW_COUNT_OK, reviewCountByBook);
     }
 
-    @Operation(summary = "리뷰 삭제", description = "리뷰를 삭제합니다.")
-    @DeleteMapping("/reviews/{reviewId}")
-    public ResponseEntity<ApiResponseTemplate<Void>> deleteReview(
-            Authentication authentication,
-            @PathVariable Long reviewId
-    ) {
-        if (authentication == null || authentication.getName().equals("anonymousUser")) {
-            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
-        }
-        Long profileId = Long.parseLong(authentication.getName());
 
-        reviewService.deleteReviewById(reviewId, profileId);
-        return ApiResponseTemplate.success(SuccessCode.REVIEW_DELETED, null);
-    }
 }
