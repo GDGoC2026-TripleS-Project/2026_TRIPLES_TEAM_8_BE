@@ -26,7 +26,7 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<RankingResDto> getTop5() {
 
-        return rankingRepository.findTop5ByOrderByReviewCountDesc()
+        return rankingRepository.findTop5ByReviewCountGreaterThanOrderByReviewCountDesc(0L)
                 .stream()
                 .map(RankingResDto::from)
                 .toList();
@@ -45,19 +45,19 @@ public class RankingService {
         }
     }
 
-    @Scheduled(fixedRate = 6000) // 1분마다
+    @Scheduled(fixedRate = 6000) //1분마다
     @Transactional
     public void refreshRanking() {
         updateRanking();
     }
 
     @Transactional(readOnly = true)
-    public RankingResDto getMyRanking(Long userId) {
+    public RankingResDto getMyRanking(Long profileId) {
         List<Ranking> allRankings = rankingRepository.findAllByOrderByReviewCountDesc();
 
         for (int i = 0; i < allRankings.size(); i++) {
             Ranking ranking = allRankings.get(i);
-            if (ranking.getProfile().getId().equals(userId)) {
+            if (ranking.getProfile().getId().equals(profileId) && ranking.getReviewCount() != 0) {
                 int rank = i + 1;
                 return RankingResDto.from(ranking);
             }
@@ -65,10 +65,10 @@ public class RankingService {
 
         /* 리뷰가 하나도 없어서 랭킹을 못 매기는 경우 */
 
-        Profile profile = profileRepository.findById(userId)
+        Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        long reviewCount = reviewRepository.countByProfileId(userId);
+        long reviewCount = reviewRepository.countByProfileId(profileId);
 
         return RankingResDto.builder()
                 .nickname(profile.getNickname())
