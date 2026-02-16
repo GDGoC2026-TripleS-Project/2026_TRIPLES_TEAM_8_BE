@@ -24,6 +24,9 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenProvider tokenProvider;
 
+    /**
+     * 구글 소셜 로그인 (프론트에서 sub, email을 받는 방식)
+     */
     public TokenDto googleLogin(String googleSub, String email) {
         User user = userRepository.findByGoogleSub(googleSub)
                 .orElseGet(() -> userRepository.save(User.builder()
@@ -32,10 +35,15 @@ public class AuthService {
                         .role(Role.USER)
                         .build()));
 
-        TokenDto tokenDto = tokenProvider.createToken(user.getId());
+        return generateNewTokenSet(user.getId());
+    }
 
-        saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
-
+    /**
+     * 토큰 세트 생성 및 리프레시 토큰 DB 저장
+     */
+    public TokenDto generateNewTokenSet(Long userId) {
+        TokenDto tokenDto = tokenProvider.createToken(userId);
+        saveOrUpdateRefreshToken(userId, tokenDto.getRefreshToken());
         return tokenDto;
     }
 
@@ -45,7 +53,7 @@ public class AuthService {
                     token.updateValue(tokenValue);
                     return token;
                 })
-                .orElse(new RefreshToken(userId, tokenValue));
+                .orElseGet(() -> new RefreshToken(userId, tokenValue));
 
         refreshTokenRepository.save(refreshToken);
         log.info("### DB에 리프레시 토큰 저장 완료 (UserId: {})", userId);
@@ -58,12 +66,11 @@ public class AuthService {
 
         RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(refreshTokenValue)
                 .orElseThrow(() -> {
-                    log.error("### [Reissue 실패] DB에 해당 토큰이 없음: {}", refreshTokenValue);
+                    log.error("### [Reissue 실패] DB에 해당 토큰이 없음");
                     return new BusinessException(ErrorCode.TOKEN_NOT_FOUND);
                 });
 
         TokenDto newTokenDto = tokenProvider.createToken(refreshToken.getUserId());
-
         refreshToken.updateValue(newTokenDto.getRefreshToken());
         refreshTokenRepository.save(refreshToken);
 
@@ -71,7 +78,7 @@ public class AuthService {
     }
 
     public void logout(Long userId) {
-        refreshTokenRepository.deleteById(userId);
+        //refreshTokenRepository.deleteById(userId);
         log.info("### 로그아웃: DB에서 리프레시 토큰 삭제 완료 (ID: {})", userId);
     }
 
