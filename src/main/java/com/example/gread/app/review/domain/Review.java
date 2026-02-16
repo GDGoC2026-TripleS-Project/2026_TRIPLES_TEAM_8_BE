@@ -35,7 +35,7 @@ public class Review extends BaseTimeEntity{
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
+    @JoinColumn
     private Book book;
 
     @Enumerated(EnumType.STRING)
