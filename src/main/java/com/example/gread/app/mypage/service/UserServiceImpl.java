@@ -34,14 +34,12 @@ public class UserServiceImpl implements UserService {
     public UserProfileDto updateMyProfile(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        
+
         if (user.getProfile() != null) {
             if (request.getNickname() != null) {
                 user.getProfile().setNickname(request.getNickname());
             }
-            if (request.getProfileImageUrl() != null) {
-                user.getProfile().setProfileImageUrl(request.getProfileImageUrl());
-            }
+            // profileImageUrl 관련 로직 제거됨
         }
         return toDto(user);
     }
@@ -57,7 +55,15 @@ public class UserServiceImpl implements UserService {
     public Page<ReviewDto> getMyReviews(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        Page<Review> reviews = reviewRepository.findByUser(user, pageable);
+
+        // [중요] Review가 이제 Profile을 바라보므로 user.getProfile()로 조회
+        if (user.getProfile() == null) {
+            return Page.empty();
+        }
+
+        // ReviewRepository에 findByProfile 메서드가 있어야 합니다.
+        Page<Review> reviews = reviewRepository.findByProfile(user.getProfile(), pageable);
+
         return reviews.map(r -> ReviewDto.builder()
                 .reviewId(r.getReviewId())
                 .title(r.getTitle())
@@ -71,7 +77,6 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .nickname(user.getProfile() != null ? user.getProfile().getNickname() : null)
                 .readerType(user.getReaderType() != null ? user.getReaderType().name() : null)
-                .profileImageUrl(user.getProfile() != null ? user.getProfile().getProfileImageUrl() : null)
                 .build();
     }
 }

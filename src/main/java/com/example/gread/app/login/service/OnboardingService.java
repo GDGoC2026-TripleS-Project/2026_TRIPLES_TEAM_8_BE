@@ -36,21 +36,17 @@ public class OnboardingService {
 
         Profile profile = user.getProfile();
         if (profile == null) {
-            log.info("### Profile이 없어 새로 생성합니다. User ID: {}", user.getId());
             profile = Profile.builder()
                     .user(user)
+                    .id(user.getId())
                     .nickname("GUEST_" + java.util.UUID.randomUUID().toString().substring(0, 8))
                     .build();
             profileRepository.save(profile);
             user.setProfile(profile);
         }
 
-        if (user.getReaderType() != null && profile.getNickname() != null) {
-            log.info("### 이미 온보딩을 완료한 유저입니다. User ID: {}", user.getId());
-        }
-
         if (!request.getNickname().equals(profile.getNickname()) &&
-                userRepository.existsByProfileNickname(request.getNickname())) {
+                profileRepository.existsByNickname(request.getNickname())) {
             throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
@@ -58,16 +54,25 @@ public class OnboardingService {
         profile.setTestResultCode(request.getTestResultCode());
         profile.setPreferenceTags(request.getPreferenceTags());
 
+        ReaderType readerType;
         try {
-            String typeStr = request.getReaderType() != null ? request.getReaderType() : "TYPE_A";
-            user.setReaderType(ReaderType.valueOf(typeStr.toUpperCase()));
+            String typeStr = (request.getReaderType() != null) ? request.getReaderType() : "TYPE_A";
+            readerType = ReaderType.valueOf(typeStr.toUpperCase());
+            profile.setReaderType(readerType);
         } catch (IllegalArgumentException e) {
-            log.warn("### 유효하지 않은 ReaderType: {}. 기본값 TYPE_A로 설정합니다.", request.getReaderType());
-            user.setReaderType(ReaderType.TYPE_A);
+            readerType = ReaderType.TYPE_A;
+            profile.setReaderType(readerType);
         }
 
-        log.info("### 온보딩 정보 업데이트 성공. User ID: {}", user.getId());
+        user.upgradeToUser();
 
-        return null;
+        log.info("### 온보딩 완료 - User: {}, Nickname: {}, Type: {}", user.getId(), profile.getNickname(), readerType);
+
+        return OnboardingResponseDto.builder()
+                .readerType(readerType.name())
+                .readerTitle(readerType.getTitle())
+                .descriptionLines(readerType.getDescriptionLines())
+                .recommendedCategoryCode(readerType.getCategoryCodes().get(0))
+                .build();
     }
 }
