@@ -48,31 +48,40 @@ public class AuthService {
     }
 
     public void saveOrUpdateRefreshToken(Long userId, String tokenValue) {
+        String pureToken = tokenValue.startsWith("Bearer ") ? tokenValue.substring(7) : tokenValue;
+
+        log.info("### [DB 저장 시도] UserId: {}, Token(순수): {}", userId, pureToken.substring(0, 10) + "...");
+
         RefreshToken refreshToken = refreshTokenRepository.findById(userId)
                 .map(token -> {
-                    token.updateValue(tokenValue);
+                    token.updateValue(pureToken);
                     return token;
                 })
-                .orElseGet(() -> new RefreshToken(userId, tokenValue));
+                .orElseGet(() -> new RefreshToken(userId, pureToken));
 
         refreshTokenRepository.save(refreshToken);
-        log.info("### DB에 리프레시 토큰 저장 완료 (UserId: {})", userId);
+        log.info("### [DB 저장 완료] UserId: {}", userId);
     }
 
     public TokenDto reissue(String refreshTokenValue) {
-        if (!tokenProvider.validateToken(refreshTokenValue)) {
+        String pureToken = refreshTokenValue.startsWith("Bearer ") ? refreshTokenValue.substring(7) : refreshTokenValue;
+
+        if (!tokenProvider.validateToken(pureToken)) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(refreshTokenValue)
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(pureToken)
                 .orElseThrow(() -> {
-                    log.error("### [Reissue 실패] DB에 해당 토큰이 없음");
+                    log.error("### [Reissue 실패] DB에 순수 토큰 값이 없음: {}", pureToken);
                     return new BusinessException(ErrorCode.TOKEN_NOT_FOUND);
                 });
 
         TokenDto newTokenDto = tokenProvider.createToken(refreshToken.getUserId());
-        refreshToken.updateValue(newTokenDto.getRefreshToken());
-        refreshTokenRepository.save(refreshToken);
+
+        String newPureRefreshToken = newTokenDto.getRefreshToken().startsWith("Bearer ")
+                ? newTokenDto.getRefreshToken().substring(7) : newTokenDto.getRefreshToken();
+
+        refreshToken.updateValue(newPureRefreshToken);
 
         return newTokenDto;
     }
