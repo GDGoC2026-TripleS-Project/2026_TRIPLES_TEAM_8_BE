@@ -22,7 +22,15 @@ public enum SuccessCode {
 
     REVIEW_UPDATED(HttpStatus.OK, "리뷰 수정 성공"),
 
-    REVIEW_DELETED(HttpStatus.OK, "리뷰 삭제가 완료되었습니다.");
+    REVIEW_DELETED(HttpStatus.OK, "리뷰 삭제가 완료되었습니다."),
+
+    // 랭킹 관련
+    RANKING_LIST_OK(HttpStatus.OK, "상위 5위 랭킹 조회 성공"),
+
+    RANKING_ME_OK(HttpStatus.OK, "내 랭킹 조회 성공"),
+
+    RANKING_REVIEW_COUNT_OK(HttpStatus.OK, "내 리뷰 개수 조회 성공");
+
 
     private final HttpStatus httpStatus;
     private final String message;

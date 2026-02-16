@@ -29,7 +29,7 @@ public class RankingController {
 
         List<RankingResDto> top5 = rankingService.getTop5();
 
-        return ApiResponseTemplate.success(SuccessCode.OK, top5);
+        return ApiResponseTemplate.success(SuccessCode.RANKING_LIST_OK, top5);
     }
 
     @Operation(summary = "내 랭킹 조회", description = "자신의 순위를 조회합니다.(만약 본인의 리뷰수가 0개라면 0위로 표시됩니다.")
@@ -42,7 +42,7 @@ public class RankingController {
 
         RankingResDto myRanking = rankingService.getMyRanking(profileId);
 
-        return ApiResponseTemplate.success(SuccessCode.OK, myRanking);
+        return ApiResponseTemplate.success(SuccessCode.RANKING_ME_OK, myRanking);
     }
 
     @Operation(summary = "유저 리뷰 개수 조회", description = "유저가 작성한 리뷰의 개수를 조회합니다.")
@@ -55,6 +55,6 @@ public class RankingController {
 
         long reviewCountByBook = rankingService.getReviewCountByProfileId(profileId);
 
-        return ApiResponseTemplate.success(SuccessCode.OK, reviewCountByBook);
+        return ApiResponseTemplate.success(SuccessCode.RANKING_REVIEW_COUNT_OK, reviewCountByBook);
     }
 }

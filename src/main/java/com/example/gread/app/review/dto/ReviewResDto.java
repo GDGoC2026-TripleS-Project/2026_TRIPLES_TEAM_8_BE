@@ -14,7 +14,6 @@ public class ReviewResDto {
 
     private Long reviewId;
     private Long profileId;
-    private Long userId;
     private Long bookId;
 
     private String nickname;
@@ -39,7 +38,6 @@ public class ReviewResDto {
         return ReviewResDto.builder()
                 .reviewId(review.getReviewId())
                 .profileId(review.getProfile().getId())
-                .userId(review.getProfile().getId())
                 .bookId(review.getBook().getId())
                 .nickname(review.getProfile().getNickname())
                 .testResultCode(review.getProfile().getTestResultCode())
