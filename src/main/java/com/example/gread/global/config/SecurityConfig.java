@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/auth/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/home/**").permitAll()
                         .requestMatchers("/api/login/onboarding").permitAll()
+                        .requestMatchers("/api/feed/explore").permitAll()
 
                         .anyRequest().authenticated()
                 )
