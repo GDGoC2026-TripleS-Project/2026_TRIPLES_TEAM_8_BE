@@ -29,13 +29,13 @@ public class Book {
     private String author;
     private String publisher;
 
-    @Column(name = "major_name") // DB: major_name
+    @Column(name = "major_name") // DB: major_name 대분류 카테고리
     private String majorName;
 
     @Column(name = "minor_code") // DB: minor_code
     private String minorCode;
 
-    @Column(name = "minor_name") // DB: minor_name
+    @Column(name = "minor_name") // DB: minor_name 소분류 카테고리
     private String minorName;
 
     private String keyword1;
