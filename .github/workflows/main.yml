@@ -3,18 +3,12 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -24,95 +18,56 @@ jobs:
       - name: Give Gradle wrapper execute permissions
         run: chmod +x ./gradlew
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      ### application.properties 생성
-      - name: Generate application.properties (main)
+      - name: Generate application.properties
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_PROPERTIES }}" > src/main/resources/application.properties
 
-      ### Gradle Build (테스트 제외)
-      - name: Build with Gradle Wrapper
+      - name: Build with Gradle
         run: ./gradlew build -x test
 
-      ### Docker 로그인
       - name: Docker login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      ### Docker 이미지 빌드 및 푸시 (핵심 수정: latest 태그 추가)
       - name: Build and push Docker image
         run: |
-          # 커밋 해시 태그와 latest 태그 두 개를 동시에 생성해서 푸시합니다.
-          docker build \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ github.sha }} \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest \
-            -f ./Dockerfile .
-          
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ github.sha }}
+          # 서버에서 인식하기 쉽게 latest 태그를 반드시 함께 만듭니다.
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest -f ./Dockerfile .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
-
-      ### EC2 배포 (핵심 수정: 이미지 갱신 로직 보완)
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Starting deployment..."
-            cd ~/howWeather-backend
-            
-            echo "Pulling latest changes from git..."
-            git fetch --all
-            git reset --hard origin/main
-            
-            # 1. 최신 이미지(latest) 미리 받아오기
-            echo "Pulling latest Docker image..."
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
-            
-            # 2. .env 파일 생성 (DOCKER_IMAGE를 latest로 고정하여 compose 연동)
-            echo "Setting environment variables..."
-            cat > .env <<EOL
-            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            DOCKERHUB_REPOSITORY=${{ secrets.DOCKERHUB_REPOSITORY }}
-            GITHUB_SHA=${{ github.sha }}
-            DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
-            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            JWT_EXPIRATION_ACCESS=${{ secrets.JWT_EXPIRATION_ACCESS }}
-            JWT_EXPIRATION_REFRESH=${{ secrets.JWT_EXPIRATION_REFRESH }}
-            OPENWEATHER_API_KEY=${{ secrets.WEATHER_SERVICE_KEY }}
-            EOL
-            
-            # 3. 컨테이너 재시작 (새 이미지가 있으면 알아서 교체됨)
-            echo "Restarting containers..."
-            docker compose down app || true
-            docker compose up -d app
-            
-            # 4. 미사용 이미지 정리 (용량 확보)
-            docker image prune -f
-            
-            echo "Deployment completed successfully!"
-            docker ps
-
-  # 종속성 체크 (기존 유지)
-  dependency-submission:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@v4
+          
+          ###  EC2 배포 (호환성 수정 버전)
+          - name: Deploy to EC2
+            uses: appleboy/ssh-action@master
+            with:
+              host: ${{ secrets.HOST }}
+              username: ${{ secrets.SSH_USERNAME }}
+              key: ${{ secrets.SSH_PRIVATE_KEY }}
+              script: |
+                cd ~/howWeather-backend
+          
+                # 1. 이미지 가져오기
+                docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+          
+                # 2. .env 파일 생성
+                cat > .env <<EOL
+                DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+                SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+                SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+                SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+                JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+                JWT_EXPIRATION_ACCESS=${{ secrets.JWT_EXPIRATION_ACCESS }}
+                GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+                GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+                EOL
+          
+                # 3. 하이픈(-)이 들어간 docker-compose 명령어로 실행
+                # 서버 버전 문제 해결을 위해 이 방식을 사용합니다.
+                docker-compose --env-file .env down || true
+                docker-compose --env-file .env up -d --no-deps app
+          
+                # 4. 정리
+                docker image prune -f
+                docker ps
