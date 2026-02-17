@@ -1,7 +1,6 @@
 package com.example.gread.global.config;
 
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
-import com.example.gread.global.config.JwtAuthenticationEntryPoint;
 import com.example.gread.app.login.config.TokenProvider;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.dto.TokenDto;
@@ -75,7 +74,8 @@ public class SecurityConfig {
                             TokenDto tokenDto = tokenProvider.createToken(user.getId());
                             authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
 
-                            String targetUrl = "http://localhost:3000/onboarding?token=" + tokenDto.getAccessToken();
+                            // [수정] localhost:3000 대신 배포 도메인으로 리다이렉트
+                            String targetUrl = "http://sss-gread.duckdns.org/onboarding?token=" + tokenDto.getAccessToken();
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -88,7 +88,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        // [수정] CORS 허용 목록에 배포 도메인 추가
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://sss-gread.duckdns.org"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
