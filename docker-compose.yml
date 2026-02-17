@@ -5,17 +5,20 @@ services:
     ports:
       - "8080:8080"
     restart: always
+    # 이 부분이 추가되었습니다! .env 파일의 변수들을 읽어옵니다.
+    env_file:
+      - .env
     environment:
-      # application.yml의 ${DB_URL} 등과 매핑
-      DB_URL: ${SPRING_DATASOURCE_URL}
-      DB_USER_NAME: ${SPRING_DATASOURCE_USERNAME}
-      DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      # application.yml의 설정과 매핑
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
 
-      # JWT 설정 매핑 (yml의 이름과 일치시킴)
+      # JWT 설정
       JWT_SECRET: ${JWT_SECRET_KEY}
       ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS: ${JWT_EXPIRATION_ACCESS}
 
-      # OAuth2 설정 (필요시 추가)
+      # OAuth2 설정
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
 
