@@ -34,40 +34,31 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          # 서버에서 인식하기 쉽게 latest 태그를 반드시 함께 만듭니다.
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest -f ./Dockerfile .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
-          
-          ###  EC2 배포 (호환성 수정 버전)
-          - name: Deploy to EC2
-            uses: appleboy/ssh-action@master
-            with:
-              host: ${{ secrets.HOST }}
-              username: ${{ secrets.SSH_USERNAME }}
-              key: ${{ secrets.SSH_PRIVATE_KEY }}
-              script: |
-                cd ~/howWeather-backend
-          
-                # 1. 이미지 가져오기
-                docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
-          
-                # 2. .env 파일 생성
-                cat > .env <<EOL
-                DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
-                SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-                SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-                SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-                JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-                JWT_EXPIRATION_ACCESS=${{ secrets.JWT_EXPIRATION_ACCESS }}
-                GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-                GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-                EOL
-          
-                # 3. 하이픈(-)이 들어간 docker-compose 명령어로 실행
-                # 서버 버전 문제 해결을 위해 이 방식을 사용합니다.
-                docker-compose --env-file .env down || true
-                docker-compose --env-file .env up -d --no-deps app
-          
-                # 4. 정리
-                docker image prune -f
-                docker ps
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/howWeather-backend
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+            
+            cat > .env <<EOL
+            DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            JWT_EXPIRATION_ACCESS=${{ secrets.JWT_EXPIRATION_ACCESS }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            EOL
+            
+            # 구버전 도커 명령어로 호환성 해결
+            sudo docker-compose --env-file .env down || true
+            sudo docker-compose --env-file .env up -d --no-deps app
+            sudo docker image prune -f
