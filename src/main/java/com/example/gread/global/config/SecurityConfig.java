@@ -65,17 +65,17 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 토큰을 발급합니다.");
+                            log.info("### 구글 인증 성공! HTTPS 토큰 리다이렉트를 시작합니다.");
 
-                            String email = authentication.getName(); // CustomOAuth2UserService에서 설정한 key값(email)
+                            String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
                                     .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
                             TokenDto tokenDto = tokenProvider.createToken(user.getId());
                             authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
 
-                            // [수정] localhost:3000 대신 배포 도메인으로 리다이렉트
-                            String targetUrl = "http://sss-gread.duckdns.org/onboarding?token=" + tokenDto.getAccessToken();
+                            // [변경] 오직 HTTPS로만 리다이렉트
+                            String targetUrl = "https://sss-gread.duckdns.org/onboarding?token=" + tokenDto.getAccessToken();
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -88,8 +88,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // [수정] CORS 허용 목록에 배포 도메인 추가
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://sss-gread.duckdns.org"));
+
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://sss-gread.duckdns.org"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
