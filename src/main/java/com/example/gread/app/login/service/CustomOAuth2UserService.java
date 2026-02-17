@@ -1,6 +1,5 @@
 package com.example.gread.app.login.service;
 
-import com.example.gread.app.login.config.TokenProvider;
 import com.example.gread.app.login.domain.Profile;
 import com.example.gread.app.login.domain.Role;
 import com.example.gread.app.login.domain.User;
@@ -28,8 +27,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
-    private final TokenProvider tokenProvider;
-    private final AuthService authService;
 
     @Override
     @Transactional
@@ -43,15 +40,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String googleName = (String) attributes.get("name");
 
         User user = saveOrUpdate(email, sub, googleName);
-
-        //test용 토큰 발급
-        var tokenDto = tokenProvider.createToken(user.getId());
-        authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
-        log.info("=============================================");
-        log.info("### 테스트용 토큰 발급 완료");
-        log.info("AccessToken: {}", tokenDto.getAccessToken());
-        log.info("RefreshToken: {}", tokenDto.getRefreshToken());
-        log.info("=============================================");
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),

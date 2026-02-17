@@ -10,6 +10,7 @@ import com.example.gread.app.login.service.AuthService;
 import com.example.gread.app.login.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -37,6 +39,12 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final TokenProvider tokenProvider;
+
+    @Value("${spring.security.oauth2.front-redirect-uri}")
+    private String frontRedirectUri;
+
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -73,7 +81,12 @@ public class SecurityConfig {
                             TokenDto tokenDto = tokenProvider.createToken(user.getId());
                             authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
 
-                            String targetUrl = "http://localhost:3000/onboarding?token=" + tokenDto.getAccessToken();
+                            String targetUrl = UriComponentsBuilder.fromUriString(frontRedirectUri + "/onboarding")
+                                    .queryParam("accessToken", tokenDto.getAccessToken())
+                                    .queryParam("refreshToken", tokenDto.getRefreshToken())
+                                    .build().toUriString();
+
+                            log.info("### 토큰 발급 완료. 리디렉션 URL: {}", targetUrl);
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -86,7 +99,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));

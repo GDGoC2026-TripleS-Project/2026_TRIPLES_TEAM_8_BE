@@ -18,8 +18,8 @@ public enum ReaderType {
 
     private final String title;
     private final List<String> descriptionLines;
-    private final String testResultCode;
-    private final List<Integer> categoryCodes;
+    private final String testResultCode; //DB에 기록용(프론트 결정)
+    private final List<Integer> categoryCodes; //DB에서 리뷰 필터링하는 실제 값(백엔드 사용)
 
     ReaderType(String title, List<String> descriptionLines, String testResultCode, List<Integer> categoryCodes) {
         this.title = title;

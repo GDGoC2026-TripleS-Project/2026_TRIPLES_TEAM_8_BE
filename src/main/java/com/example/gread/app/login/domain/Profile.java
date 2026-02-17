@@ -19,10 +19,10 @@ public class Profile {
 
     @Id
     @Column(name = "profile_id")
-    private Long id; // User의 ID를 그대로 사용하기 위해 @GeneratedValue 제거
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId // User의 PK(user_id)를 Profile의 PK(profile_id)로 매핑 (공유 PK 전략)
+    @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 

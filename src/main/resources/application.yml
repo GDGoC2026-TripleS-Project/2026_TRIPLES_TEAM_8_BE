@@ -1,9 +1,4 @@
 spring:
-  mvc:
-    static-path-pattern: /images/**
-    web:
-      resources:
-        static-locations: classpath:/static/images/
   datasource:
     url: ${DB_URL}
     username: ${DB_USER_NAME}
@@ -19,6 +14,7 @@ spring:
             scope:
               - profile
               - email
+      front-redirect-uri: ${FRONT_REDIRECT_URI:http://localhost:3000}
   jpa:
     hibernate:
       ddl-auto: update
@@ -35,6 +31,9 @@ output:
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
 
 logging:
   level:

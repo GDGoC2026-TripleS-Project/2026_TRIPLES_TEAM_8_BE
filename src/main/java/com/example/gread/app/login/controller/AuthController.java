@@ -25,10 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * [GET] /api/login
-     * 사용자가 브라우저에서 이 주소로 진입하면 Spring Security의 OAuth2 인증 프로세스를 시작합니다.
-     */
+
     @Operation(summary = "구글 로그인 진입점", description = "구글 로그인 페이지로 리다이렉트하여 인증을 시작합니다.")
     @GetMapping
     public void googleLogin(HttpServletResponse response) throws IOException {
@@ -36,10 +33,6 @@ public class AuthController {
         response.sendRedirect("/oauth2/authorization/google");
     }
 
-    /**
-     * [POST] /api/login/reissue
-     * Refresh Token을 사용해 새로운 Access/Refresh Token 세트를 발급받습니다.
-     */
     @Operation(summary = "JWT 토큰 재발급 (Reissue)",
             description = "헤더의 Authorization-Refresh(Bearer 포함 가능)를 이용하여 새 토큰을 발급합니다.")
     @PostMapping("/reissue")
@@ -52,10 +45,6 @@ public class AuthController {
         return ApiResponseTemplate.success(SuccessCode.OK, authService.reissue(token));
     }
 
-    /**
-     * [POST] /api/login/logout
-     * DB에서 해당 유저의 Refresh Token을 삭제합니다.
-     */
     @Operation(summary = "로그아웃", description = "DB에서 리프레시 토큰을 삭제하여 로그아웃 처리합니다.")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponseTemplate<Void>> logout(@AuthenticationPrincipal String userId) {
@@ -69,10 +58,6 @@ public class AuthController {
         return ApiResponseTemplate.success(SuccessCode.OK, null);
     }
 
-    /**
-     * [DELETE] /api/login/withdraw
-     * 유저 정보와 토큰 정보를 모두 삭제합니다.
-     */
     @Operation(summary = "회원 탈퇴", description = "유저 정보 및 리프레시 토큰을 영구 삭제합니다.")
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponseTemplate<Void>> withdraw(@AuthenticationPrincipal String userId) {

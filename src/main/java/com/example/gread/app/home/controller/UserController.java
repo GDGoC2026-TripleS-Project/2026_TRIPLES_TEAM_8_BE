@@ -1,14 +1,16 @@
 package com.example.gread.app.home.controller;
 
-import com.example.gread.app.home.domain.ReaderType;
+import com.example.gread.app.home.dto.OnboardingResponseDto;
 import com.example.gread.app.login.dto.OnboardingRequestDto;
-import com.example.gread.app.login.domain.User;
-import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.login.service.OnboardingService;
+import com.example.gread.global.code.SuccessCode;
+import com.example.gread.global.responseTemplate.ApiResponseTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,17 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserRepository userRepository;
 
-    @Operation(summary = "내 정보 조회", description = "현재 로그인한 유저의 프로필 정보를 가져옵니다.")
+    private final OnboardingService onboardingService;
+
+    @Operation(summary = "온보딩 정보 저장", description = "사용자의 닉네임, 독서 유형 등 온보딩 정보를 저장합니다.")
     @PostMapping("/onboarding")
-    public ResponseEntity<?> saveOnboarding(@Valid @RequestBody OnboardingRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public ResponseEntity<ApiResponseTemplate<OnboardingResponseDto>> saveOnboarding(
+            Authentication authentication,
+            @Valid @RequestBody OnboardingRequestDto request) {
 
-        user.completeOnboarding(request.getNickname(), ReaderType.valueOf(request.getReaderType()));
-        userRepository.save(user);
-
-        return ResponseEntity.ok("온보딩 완료!");
+        OnboardingResponseDto response = onboardingService.updateOnboarding(authentication.getName(), request);
+        return ApiResponseTemplate.success(SuccessCode.OK, response);
     }
 }
