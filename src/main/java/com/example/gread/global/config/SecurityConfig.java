@@ -21,7 +21,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -39,9 +38,6 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.front-redirect-uri}")
     private String frontRedirectUri;
 
-    @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -53,32 +49,32 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
+                // HTTPS 환경 유지를 위해 보안 채널 설정
+                .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/favicon.ico").permitAll()
-                        .requestMatchers("/api/login/**", "/oauth2/**", "/login/**").permitAll() // /login/** 추가 필수
+                        .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 프론트엔드로 리다이렉트합니다.");
+                            log.info("### OAuth2 성공! 리다이렉트를 진행합니다.");
 
                             String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
                                     .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-                            // 1. 임시 인증 코드 생성
                             String authCode = authService.generateAuthCode(user.getId());
 
-                            // 2. [필수] frontRedirectUri가 null이거나 비어있는지 확인 후 주소 생성
+                            // 최종 프론트엔드 리다이렉트 주소 구성
                             String targetUrl = (frontRedirectUri != null ? frontRedirectUri : "https://sss-gread.duckdns.org")
                                     + "/callback?code=" + authCode;
 
-                            log.info("### 최종 리다이렉트 주소: {}", targetUrl);
-
-                            // 3. 브라우저에게 해당 주소로 이동하라고 명령
+                            log.info("### Redirecting to: {}", targetUrl);
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -90,16 +86,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // 환경변수에서 가져온 허용 도메인 리스트 적용
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        configuration.setAllowedOrigins(origins);
-
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -14,9 +14,9 @@ spring:
             scope:
               - profile
               - email
-            # [수정] 이 주소가 구글 콘솔에 등록한 'https://sss-gread.duckdns.org/login/oauth2/code/google'과 매칭됩니다.
+            # [중요] 구글 콘솔에 등록된 https 주소와 정확히 일치해야 합니다.
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
-      # 배포 환경 변수(FRONT_REDIRECT_URI)가 없다면 기본적으로 운영 도메인의 https 주소를 바라보게 설정하는 것이 안전합니다.
+      # 인증 완료 후 프론트엔드로 돌아갈 주소 (운영은 https 필수)
       front-redirect-uri: ${FRONT_REDIRECT_URI:https://sss-gread.duckdns.org}
   jpa:
     hibernate:
@@ -29,12 +29,13 @@ spring:
     open-in-view: false
 
 server:
+  # 프록시(Nginx) 뒤에 있을 때 X-Forwarded-Proto 헤더를 읽어 https를 유지하게 함
   forward-headers-strategy: native
-  # 프록시 서버(Nginx)의 헤더 정보를 더 확실히 읽어오기 위한 설정
   tomcat:
     remoteip:
       remote-ip-header: x-forwarded-for
       protocol-header: x-forwarded-proto
+      # 모든 프록시 IP를 신뢰하도록 설정 (Nginx 연동 시 필수)
       internal-proxies: ".*"
 
 output:
@@ -46,6 +47,7 @@ jwt:
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
 
 cors:
+  # 환경변수에서 쉼표로 구분된 도메인 리스트를 읽어옵니다.
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://sss-gread.duckdns.org}
 
 logging:
