@@ -1,42 +1,35 @@
 package com.example.gread.app.login.domain;
 
-import com.example.gread.app.home.domain.ReaderType;
-import com.example.gread.app.review.domain.Review;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Profile {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "profile_id")
     private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private User user;
 
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(name = "preference_tags")
-    private String preferenceTags;
+    private String testResultCode; // 심리테스트 결과 (ex: 'TYPE_A')
+    private String preferenceTags; // 선택 키워드 2개 저장
+    
+    private String profileImageUrl; // 프로필 이미지 URL
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "reader_type")
-    private ReaderType readerType;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
-    private List<Review> reviews = new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+    
+    @Builder
+    public Profile(User user) {
+        this.user = user;
+    }
 }

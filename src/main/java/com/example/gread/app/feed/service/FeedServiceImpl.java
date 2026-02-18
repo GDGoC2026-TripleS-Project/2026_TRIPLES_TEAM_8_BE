@@ -1,34 +1,60 @@
 package com.example.gread.app.feed.service;
 
-import com.example.gread.app.bookDetail.domain.Book;
 import com.example.gread.app.bookDetail.dto.BookDetailResponse;
+import com.example.gread.app.bookDetail.domain.Book;
 import com.example.gread.app.feed.repository.FeedBookRepository;
+import com.example.gread.app.home.domain.ReaderType;
+import com.example.gread.app.login.domain.User;
+import com.example.gread.app.login.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FeedServiceImpl implements FeedService {
 
     private final FeedBookRepository bookRepository;
+    private final UserRepository userRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<BookDetailResponse> getBooks(String category, String keyword) {
-        // "전체" 혹은 빈 값일 때 필터 해제
-        String filterCategory = (category == null || category.isEmpty() || category.equals("전체")) ? null : category;
-        return bookRepository.findByFilters(filterCategory, keyword).stream()
-                .map(this::toDto)
-                .toList();
+    public Page<BookDetailResponse> getBooks(String category, String keyword, Pageable pageable) {
+        Page<Book> books;
+        boolean hasCategory = StringUtils.hasText(category) && !category.equals("전체");
+        boolean hasKeyword = StringUtils.hasText(keyword);
+
+        if (hasCategory && hasKeyword) {
+            books = bookRepository.findByMajorNameAndKeyword(category, keyword, pageable);
+        } else if (hasCategory) {
+            books = bookRepository.findByMajorName(category, pageable);
+        } else if (hasKeyword) {
+            books = bookRepository.findByKeyword(keyword, pageable);
+        } else {
+            books = bookRepository.findAll(pageable);
+        }
+        return books.map(this::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<BookDetailResponse> getMyFeed(Long userId) {
-        return bookRepository.findAll().stream().map(this::toDto).toList();
+    public Page<BookDetailResponse> getMyFeed(Long userId, Pageable pageable) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            ReaderType readerType = user.getReaderType();
+            if (readerType != null) {
+                List<String> majorNames = readerType.getMajorNames();
+                if (!majorNames.isEmpty()) {
+                    return bookRepository.findByMajorNameIn(majorNames, pageable).map(this::toDto);
+                }
+            }
+        }
+        // 사용자를 찾지 못하거나 ReaderType 정보가 없는 경우 전체 도서 목록 반환
+        return bookRepository.findAll(pageable).map(this::toDto);
     }
 
     private BookDetailResponse toDto(Book book) {
@@ -37,9 +63,9 @@ public class FeedServiceImpl implements FeedService {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
+                .majorName(book.getMajorName())
                 .keyword1(book.getKeyword1())
                 .keyword2(book.getKeyword2())
-                .majorName(book.getMajorName())
                 .build();
     }
 }

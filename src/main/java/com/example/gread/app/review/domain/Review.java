@@ -17,6 +17,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.text.Format;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -35,7 +37,7 @@ public class Review extends BaseTimeEntity{
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn
+    @JoinColumn(name = "book_id")
     private Book book;
 
     @Enumerated(EnumType.STRING)

@@ -1,6 +1,7 @@
 package com.example.gread.global.config;
 
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
+import com.example.gread.app.login.config.JwtAuthenticationEntryPoint; // 추가 확인 필요
 import com.example.gread.app.login.config.TokenProvider;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.dto.TokenDto;

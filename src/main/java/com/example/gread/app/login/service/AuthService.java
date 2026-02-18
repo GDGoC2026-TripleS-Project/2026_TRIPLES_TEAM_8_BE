@@ -32,50 +32,40 @@ public class AuthService {
                         .role(Role.USER)
                         .build()));
 
-        return generateNewTokenSet(user.getId());
-    }
+        TokenDto tokenDto = tokenProvider.createToken(user.getId());
 
-    public TokenDto generateNewTokenSet(Long userId) {
-        TokenDto tokenDto = tokenProvider.createToken(userId);
-        saveOrUpdateRefreshToken(userId, tokenDto.getRefreshToken());
+        saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
+
         return tokenDto;
     }
 
     public void saveOrUpdateRefreshToken(Long userId, String tokenValue) {
-        String pureToken = tokenValue.startsWith("Bearer ") ? tokenValue.substring(7) : tokenValue;
-
-        log.info("### [DB 저장 시도] UserId: {}, Token(순수): {}", userId, pureToken.substring(0, 10) + "...");
-
         RefreshToken refreshToken = refreshTokenRepository.findById(userId)
                 .map(token -> {
-                    token.updateValue(pureToken);
+                    token.updateValue(tokenValue);
                     return token;
                 })
-                .orElseGet(() -> new RefreshToken(userId, pureToken));
+                .orElse(new RefreshToken(userId, tokenValue));
 
         refreshTokenRepository.save(refreshToken);
-        log.info("### [DB 저장 완료] UserId: {}", userId);
+        log.info("### DB에 리프레시 토큰 저장 완료 (UserId: {})", userId);
     }
 
     public TokenDto reissue(String refreshTokenValue) {
-        String pureToken = refreshTokenValue.startsWith("Bearer ") ? refreshTokenValue.substring(7) : refreshTokenValue;
-
-        if (!tokenProvider.validateToken(pureToken)) {
+        if (!tokenProvider.validateToken(refreshTokenValue)) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(pureToken)
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(refreshTokenValue)
                 .orElseThrow(() -> {
-                    log.error("### [Reissue 실패] DB에 순수 토큰 값이 없음: {}", pureToken);
+                    log.error("### [Reissue 실패] DB에 해당 토큰이 없음: {}", refreshTokenValue);
                     return new BusinessException(ErrorCode.TOKEN_NOT_FOUND);
                 });
 
         TokenDto newTokenDto = tokenProvider.createToken(refreshToken.getUserId());
 
-        String newPureRefreshToken = newTokenDto.getRefreshToken().startsWith("Bearer ")
-                ? newTokenDto.getRefreshToken().substring(7) : newTokenDto.getRefreshToken();
-
-        refreshToken.updateValue(newPureRefreshToken);
+        refreshToken.updateValue(newTokenDto.getRefreshToken());
+        refreshTokenRepository.save(refreshToken);
 
         return newTokenDto;
     }
