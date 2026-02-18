@@ -14,7 +14,7 @@ spring:
             scope:
               - profile
               - email
-      # 운영 환경에서는 이 환경변수를 https 주소로 설정해야 합니다.
+      # 운영 환경 배포 시 환경변수로 https://sss-gread.duckdns.org 를 넣어주세요.
       front-redirect-uri: ${FRONT_REDIRECT_URI:http://localhost:3000}
   jpa:
     hibernate:
@@ -26,19 +26,24 @@ spring:
         format_sql: false
     open-in-view: false
 
-# [추가] 프록시 서버의 HTTPS 헤더를 신뢰하여 redirect 시 https를 유지하게 함
 server:
   forward-headers-strategy: native
+  # 실제 서버가 8080에서 돌아간다면 아래 설정이 프록시 환경에서 도움이 됩니다.
+  tomcat:
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
 
 output:
   ansi:
     enabled: always
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
 
 cors:
-  # 운영 도메인을 명시적으로 추가
+  # 여러 도메인을 쉼표로 구분하여 환경변수로 관리할 수 있게 설정
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://sss-gread.duckdns.org}
 
 logging:

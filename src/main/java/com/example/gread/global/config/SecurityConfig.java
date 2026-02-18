@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -35,9 +36,11 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final AuthService authService;
 
-    // application.yml의 설정값을 가져와서 리다이렉트 주소로 사용합니다.
     @Value("${spring.security.oauth2.front-redirect-uri}")
     private String frontRedirectUri;
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -50,17 +53,17 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                // HTTPS 환경에서의 Mixed Content 에러 방지를 위해 보안 채널 설정
+                // HTTPS 리다이렉트 시 프로토콜 유지를 위해 설정
                 .requiresChannel(channel -> channel.anyRequest().requiresSecure())
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/swagger-resources/**", "/webjars/**",
-                                "/", "/index.html"
+                                "/swagger-resources/**", "/webjars/**", "/", "/index.html", "/favicon.ico"
                         ).permitAll()
-                        .requestMatchers("/api/login/**", "/oauth2/**").permitAll()
+                        // OAuth2 관련 엔드포인트 모두 허용
+                        .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
                         .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
                         .anyRequest().authenticated()
@@ -69,7 +72,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 리다이렉트를 진행합니다.");
+                            log.info("### OAuth2 Login Success. Redirecting to Front-end.");
 
                             String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
@@ -77,10 +80,10 @@ public class SecurityConfig {
 
                             String authCode = authService.generateAuthCode(user.getId());
 
-                            // 하드코딩된 http 주소를 제거하고 설정된 주소를 사용합니다.
+                            // 최종 주소 생성
                             String targetUrl = frontRedirectUri + "/callback?code=" + authCode;
 
-                            log.info("### Redirecting to: {}", targetUrl);
+                            log.info("### Target URL: {}", targetUrl);
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -94,8 +97,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 운영 및 로컬 도메인을 명시적으로 허용
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://sss-gread.duckdns.org"));
+        // 환경변수에서 가져온 허용 도메인 리스트 적용
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
