@@ -3,7 +3,9 @@ package com.example.gread.app.feed.dto;
 import com.example.gread.app.bookDetail.domain.Book;
 import lombok.*;
 
-@Getter @Builder @AllArgsConstructor
+@Getter
+@Builder
+@AllArgsConstructor
 public class FeedResponse {
     private Long bookId;
     private String title;
