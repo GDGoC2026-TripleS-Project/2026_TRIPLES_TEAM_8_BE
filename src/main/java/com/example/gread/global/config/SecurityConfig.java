@@ -53,43 +53,37 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                // HTTPS 리다이렉트 시 프로토콜 유지를 위해 설정
-                .requiresChannel(channel -> channel.anyRequest().requiresSecure())
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(
-                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/swagger-resources/**", "/webjars/**", "/", "/index.html", "/favicon.ico"
-                        ).permitAll()
-                        // OAuth2 관련 엔드포인트 모두 허용
-                        .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
-                        .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/api/login/**", "/oauth2/**", "/login/**").permitAll() // /login/** 추가 필수
                         .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### OAuth2 Login Success. Redirecting to Front-end.");
+                            log.info("### 구글 인증 성공! 프론트엔드로 리다이렉트합니다.");
 
                             String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
                                     .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
+                            // 1. 임시 인증 코드 생성
                             String authCode = authService.generateAuthCode(user.getId());
 
-                            // 최종 주소 생성
-                            String targetUrl = frontRedirectUri + "/callback?code=" + authCode;
+                            // 2. [필수] frontRedirectUri가 null이거나 비어있는지 확인 후 주소 생성
+                            String targetUrl = (frontRedirectUri != null ? frontRedirectUri : "https://sss-gread.duckdns.org")
+                                    + "/callback?code=" + authCode;
 
-                            log.info("### Target URL: {}", targetUrl);
+                            log.info("### 최종 리다이렉트 주소: {}", targetUrl);
+
+                            // 3. 브라우저에게 해당 주소로 이동하라고 명령
                             response.sendRedirect(targetUrl);
                         })
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
