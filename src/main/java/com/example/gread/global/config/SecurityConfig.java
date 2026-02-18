@@ -51,10 +51,14 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // [유지] Main에 있던 필수 허용 경로들 (리뷰 관련 API들 포함)
                         .requestMatchers(
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/swagger-resources/**", "/webjars/**",
-                                "/", "/index.html"
+                                "/", "/index.html",
+                                "/api/reviews/{reviewId}", "/api/books/{bookId}/reviews",
+                                "/api/reviews/ranking/latest", "/api/reviews/ranking",
+                                "/api/books/{bookId}/reviews/count"
                         ).permitAll()
                         .requestMatchers("/api/login/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
@@ -64,7 +68,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 토큰을 발급하여 리다이렉트합니다.");
+                            log.info("### 구글 인증 성공! 토큰 리다이렉트를 시작합니다.");
 
                             String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
@@ -73,11 +77,13 @@ public class SecurityConfig {
                             TokenDto tokenDto = tokenProvider.createToken(user.getId());
                             authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
 
-                            String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/onboarding")
+                            // [병합] dev2의 UriComponentsBuilder를 사용하되, 운영 도메인 주소를 사용
+                            // 로컬 테스트 시에는 "http://localhost:3000/onboarding"으로 잠시 바꿔서 테스트하세요.
+                            String targetUrl = UriComponentsBuilder.fromUriString("https://sss-gread.duckdns.org/onboarding")
                                     .queryParam("accessToken", tokenDto.getAccessToken())
                                     .queryParam("refreshToken", tokenDto.getRefreshToken())
                                     .build().toUriString();
-                            
+
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -90,9 +96,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+
+        // [유지] 로컬과 운영 서버 도메인 모두 허용
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://sss-gread.duckdns.org"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Authorization-Refresh", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("*")); // dev2에서 누락된 헤더 대응을 위해 와일드카드 권장
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
