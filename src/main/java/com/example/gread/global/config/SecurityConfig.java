@@ -1,10 +1,8 @@
 package com.example.gread.global.config;
 
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
-import com.example.gread.global.config.JwtAuthenticationEntryPoint;
 import com.example.gread.app.login.config.TokenProvider;
 import com.example.gread.app.login.domain.User;
-import com.example.gread.app.login.dto.TokenDto;
 import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.app.login.service.AuthService;
 import com.example.gread.app.login.service.CustomOAuth2UserService;
@@ -36,7 +34,6 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserRepository userRepository;
     private final AuthService authService;
-    private final TokenProvider tokenProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,6 +54,7 @@ public class SecurityConfig {
                                 "/", "/index.html"
                         ).permitAll()
                         .requestMatchers("/api/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
                         .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -64,16 +62,17 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 토큰을 발급합니다.");
+                            log.info("### 구글 인증 성공! 임시 인증 코드를 발급합니다.");
 
-                            String email = authentication.getName(); // CustomOAuth2UserService에서 설정한 key값(email)
+                            String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
                                     .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-                            TokenDto tokenDto = tokenProvider.createToken(user.getId());
-                            authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
+                            String authCode = authService.generateAuthCode(user.getId());
 
-                            String targetUrl = "http://localhost:3000/onboarding?token=" + tokenDto.getAccessToken();
+                            String targetUrl = "http://localhost:3000/callback?code=" + authCode;
+
+                            log.info("### Redirecting to: {}", targetUrl);
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -86,7 +85,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
