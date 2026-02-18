@@ -1,6 +1,6 @@
 package com.example.gread.app.mypage.service;
 
-import com.example.gread.app.mypage.dto.ReviewDto;
+import com.example.gread.app.review.dto.ReviewResDto;
 import com.example.gread.app.mypage.dto.UpdateUserRequest;
 import com.example.gread.app.mypage.dto.UserProfileDto;
 import com.example.gread.app.review.domain.Review;
@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
             if (request.getNickname() != null) {
                 user.getProfile().setNickname(request.getNickname());
             }
-            // profileImageUrl 관련 로직 제거됨
         }
         return toDto(user);
     }
@@ -52,31 +51,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<ReviewDto> getMyReviews(Long userId, Pageable pageable) {
+    public Page<ReviewResDto> getMyReviews(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        // [중요] Review가 이제 Profile을 바라보므로 user.getProfile()로 조회
+        
         if (user.getProfile() == null) {
-            return Page.empty();
+            return Page.empty(pageable);
         }
-
-        // ReviewRepository에 findByProfile 메서드가 있어야 합니다.
-        Page<Review> reviews = reviewRepository.findByProfile(user.getProfile(), pageable);
-
-        return reviews.map(r -> ReviewDto.builder()
+        
+        Page<Review> reviews = reviewRepository.findByProfileId(user.getProfile().getId(), pageable);
+        return reviews.map(r -> ReviewResDto.builder()
                 .reviewId(r.getReviewId())
-                .title(r.getTitle())
-                .content(r.getReviewContent())
+                .reviewContent(r.getReviewContent())
                 .build());
     }
 
     private UserProfileDto toDto(User user) {
+        Long reviewCount = 0L;
+        if (user.getProfile() != null) {
+            reviewCount = reviewRepository.countByProfileId(user.getProfile().getId());
+        }
+
         return UserProfileDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getProfile() != null ? user.getProfile().getNickname() : null)
                 .readerType(user.getReaderType() != null ? user.getReaderType().name() : null)
+                .reviewCount(reviewCount)
                 .build();
     }
 }

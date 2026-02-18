@@ -3,7 +3,6 @@ package com.example.gread.app.review.service;
 import com.example.gread.app.bookDetail.domain.Book;
 import com.example.gread.app.bookDetail.repository.BookRepository;
 import com.example.gread.app.login.domain.Profile;
-
 import com.example.gread.app.login.repository.ProfileRepository;
 import com.example.gread.app.ranking.domain.Ranking;
 import com.example.gread.app.ranking.repository.RankingRepository;
@@ -82,8 +81,8 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResDto> findLatestReviewsByBookId(Long bookId) {
-        List<Review> reviews = reviewRepository.findByBookIdOrderByCreatedAtDesc(bookId);
+    public List<ReviewResDto> findLatestReviews() {
+        List<Review> reviews = reviewRepository.findAllByOrderByCreatedAtDesc();
         return reviews.stream()
                 .map(ReviewResDto::from)
                 .toList();

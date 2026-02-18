@@ -1,3 +1,4 @@
+/*
 package com.example.gread.app.feed.dto;
 
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ public class BookDto {
     private String title;
     private String author;
     private String publisher;
-    private String thumbnailUrl;
     private String keyword1;
     private String keyword2;
 }
+*/
