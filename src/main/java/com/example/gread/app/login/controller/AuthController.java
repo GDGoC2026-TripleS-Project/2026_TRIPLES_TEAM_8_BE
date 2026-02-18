@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +27,25 @@ public class AuthController {
 
     private final AuthService authService;
 
-
     @Operation(summary = "구글 로그인 진입점", description = "구글 로그인 페이지로 리다이렉트하여 인증을 시작합니다.")
     @GetMapping
     public void googleLogin(HttpServletResponse response) throws IOException {
         log.info("### 구글 로그인 인증 시작 (Redirect to OAuth2)");
         response.sendRedirect("/oauth2/authorization/google");
+    }
+
+    @Operation(summary = "최종 토큰 발급", description = "리다이렉트 시 받은 임시 인증 코드를 사용하여 최종 토큰(Access, Refresh)과 이메일을 발급받습니다.")
+    @PostMapping("/callback")
+    public ResponseEntity<ApiResponseTemplate<TokenDto>> getFinalTokens(
+            @RequestBody AuthCodeRequest request) {
+        TokenDto tokenDto = authService.exchangeCodeForTokens(request.getCode());
+        return ApiResponseTemplate.success(SuccessCode.OK, tokenDto);
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class AuthCodeRequest {
+        private String code;
     }
 
     @Operation(summary = "JWT 토큰 재발급 (Reissue)",

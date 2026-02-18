@@ -14,4 +14,5 @@ public class TokenDto {
     private String accessToken;
     @Schema(description = "리프레시 토큰", example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ...")
     private String refreshToken;
+    private String email;
 }

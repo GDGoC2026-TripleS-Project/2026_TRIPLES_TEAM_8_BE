@@ -33,6 +33,8 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    // [중요] 빌드 에러 방지를 위해 에러 로그상 확인된 정확한 위치의 클래스를 주입받거나,
+    // 클래스가 없다면 이 필드와 exceptionHandling 설정을 제거해야 합니다.
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserRepository userRepository;
     private final AuthService authService;
@@ -51,11 +53,13 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // [유지] Main에 있던 필수 허용 경로들 (리뷰 관련 API들 포함)
                         .requestMatchers(
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/swagger-resources/**", "/webjars/**",
-                                "/", "/index.html",
+                                "/", "/index.html"
+                        ).permitAll()
+                        // [유지] 비로그인 권한 허용 경로 (운영에 필수)
+                        .requestMatchers(
                                 "/api/reviews/{reviewId}", "/api/books/{bookId}/reviews",
                                 "/api/reviews/ranking/latest", "/api/reviews/ranking",
                                 "/api/books/{bookId}/reviews/count"
@@ -68,7 +72,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 토큰 리다이렉트를 시작합니다.");
+                            log.info("### 소셜 로그인 성공! 운영 도메인으로 토큰 리다이렉트를 시작합니다.");
 
                             String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
@@ -77,8 +81,7 @@ public class SecurityConfig {
                             TokenDto tokenDto = tokenProvider.createToken(user.getId());
                             authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
 
-                            // [병합] dev2의 UriComponentsBuilder를 사용하되, 운영 도메인 주소를 사용
-                            // 로컬 테스트 시에는 "http://localhost:3000/onboarding"으로 잠시 바꿔서 테스트하세요.
+                            // [병합] 운영 도메인(HTTPS)을 기본으로 하되, 토큰 파라미터를 명확히 전달
                             String targetUrl = UriComponentsBuilder.fromUriString("https://sss-gread.duckdns.org/onboarding")
                                     .queryParam("accessToken", tokenDto.getAccessToken())
                                     .queryParam("refreshToken", tokenDto.getRefreshToken())
@@ -97,13 +100,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // [유지] 로컬과 운영 서버 도메인 모두 허용
+        // [병합] 로컬 개발 환경과 실제 운영 서버 도메인 모두 허용
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "https://sss-gread.duckdns.org"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*")); // dev2에서 누락된 헤더 대응을 위해 와일드카드 권장
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
