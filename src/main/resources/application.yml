@@ -1,14 +1,19 @@
 spring:
+  # [추가] 이미지 등 정적 리소스 핸들링 (수정 후 로직)
   mvc:
     static-path-pattern: /images/**
-    web:
-      resources:
-        static-locations: classpath:/static/images/
+  web:
+    resources:
+      static-locations: classpath:/static/images/
+
+  # [유지] 데이터베이스 설정 (환경 변수 방식)
   datasource:
     url: ${DB_URL}
     username: ${DB_USER_NAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # [병합] Security 및 OAuth2 설정
   security:
     oauth2:
       client:
@@ -19,6 +24,10 @@ spring:
             scope:
               - profile
               - email
+      # [유지] 프론트엔드 리다이렉트 주소 (환경 변수가 없으면 localhost 사용)
+      front-redirect-uri: ${FRONT_REDIRECT_URI:http://localhost:3000}
+
+  # [유지] JPA 설정
   jpa:
     hibernate:
       ddl-auto: update
@@ -29,12 +38,20 @@ spring:
         format_sql: false
     open-in-view: false
 
-output:
-  ansi:
-    enabled: always
+# [병합] JWT 및 커스텀 설정
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
+
+# [유지] CORS 허용 도메인 (운영 서버 배포 시 환경 변수로 관리 권장)
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+output:
+  ansi:
+    enabled: always
+
+# [병합] 로깅 설정
 logging:
   level:
     root: info

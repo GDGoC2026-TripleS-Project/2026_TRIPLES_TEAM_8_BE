@@ -1,5 +1,6 @@
 package com.example.gread.app.review.repository;
 
+import com.example.gread.app.login.domain.Profile;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.review.domain.Review;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-
+    Page<Review> findByProfile(Profile profile, Pageable pageable);
     // 1. 회원용: 특정 카테고리 내에서 랜덤 추출
     @Query("SELECT r FROM Review r " +
             "LEFT JOIN FETCH r.book b " +
@@ -34,13 +35,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByBookId(Long bookId);
 
-    Optional<Review> findByReviewId(Long reviewId, Long profileId);
+    Optional<Review> findByReviewIdAndProfileId(Long reviewId, Long profileId);
 
-    List<Review> findByBookIdOrderByCreatedAtDesc(Long bookId);
+    List<Review> findAllByOrderByCreatedAtDesc();
 
     Long countByBookId(Long bookId);
 
-    Long countByProfileId(Long bookId);
+    Long countByProfileId(Long profileId);
 
     Page<Review> findByUser(User user, Pageable pageable);
+
+    Page<Review> findByProfileId(Long profileId, Pageable pageable);
 }

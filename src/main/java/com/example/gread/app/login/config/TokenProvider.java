@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
 
@@ -19,8 +18,6 @@ import java.util.Date;
 public class TokenProvider {
 
     private final SecretKey key;
-    private final long accessTokenValidityTime = 1000L * 60 * 30; // 30분
-    private final long refreshTokenValidityTime = 1000L * 60 * 60 * 24 * 7; // 7일
 
     public TokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
@@ -29,16 +26,18 @@ public class TokenProvider {
 
     public TokenDto createToken(Long userId) {
         long now = (new Date()).getTime();
+        long accessTokenValidityTime = 1000L * 60 * 60 * 24;
+        long refreshTokenValidityTime = 1000L * 60 * 60 * 24 * 7;
 
         String accessToken = Jwts.builder()
-                .setSubject(userId.toString())
-                .setExpiration(new Date(now + accessTokenValidityTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject(userId.toString())
+                .expiration(new Date(now + accessTokenValidityTime))
+                .signWith(key)
                 .compact();
 
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + refreshTokenValidityTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .expiration(new Date(now + refreshTokenValidityTime))
+                .signWith(key)
                 .compact();
 
         return TokenDto.builder()
@@ -49,7 +48,7 @@ public class TokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             return false;

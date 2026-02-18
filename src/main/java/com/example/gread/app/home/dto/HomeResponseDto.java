@@ -15,7 +15,6 @@ public class HomeResponseDto {
     private String readerType;
     private List<ReviewResponseDto> reviews;
 
-    // 비회원용 정적 팩토리 메서드
     public static HomeResponseDto forGuest(List<ReviewResponseDto> reviews) {
         return HomeResponseDto.builder()
                 .nickname("방문자")

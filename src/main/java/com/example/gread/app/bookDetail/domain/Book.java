@@ -1,7 +1,11 @@
 package com.example.gread.app.bookDetail.domain;
 
+import com.example.gread.app.review.domain.Review; // Review 엔티티 임포트
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,13 +29,13 @@ public class Book {
     private String author;
     private String publisher;
 
-    @Column(name = "major_name") // DB: major_name -> majorName 필드와 매핑
+    @Column(name = "major_name") // DB: major_name 대분류 카테고리
     private String majorName;
 
     @Column(name = "minor_code") // DB: minor_code
     private String minorCode;
 
-    @Column(name = "minor_name") // DB: minor_name
+    @Column(name = "minor_name") // DB: minor_name 소분류 카테고리
     private String minorName;
 
     private String keyword1;
@@ -39,4 +43,9 @@ public class Book {
 
     @Column(name = "ai_analysis", columnDefinition = "TEXT") // DB: ai_analysis 매핑
     private String aiAnalysis;
+
+    // === 연관관계 추가 ===
+    @Builder.Default
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 }

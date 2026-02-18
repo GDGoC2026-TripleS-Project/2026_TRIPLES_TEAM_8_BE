@@ -1,6 +1,6 @@
 package com.example.gread.app.mypage.service;
 
-import com.example.gread.app.mypage.dto.ReviewDto;
+import com.example.gread.app.review.dto.ReviewResDto;
 import com.example.gread.app.mypage.dto.UpdateUserRequest;
 import com.example.gread.app.mypage.dto.UserProfileDto;
 import com.example.gread.app.review.domain.Review;
@@ -34,13 +34,10 @@ public class UserServiceImpl implements UserService {
     public UserProfileDto updateMyProfile(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        
+
         if (user.getProfile() != null) {
             if (request.getNickname() != null) {
                 user.getProfile().setNickname(request.getNickname());
-            }
-            if (request.getProfileImageUrl() != null) {
-                user.getProfile().setProfileImageUrl(request.getProfileImageUrl());
             }
         }
         return toDto(user);
@@ -54,24 +51,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<ReviewDto> getMyReviews(Long userId, Pageable pageable) {
+    public Page<ReviewResDto> getMyReviews(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        Page<Review> reviews = reviewRepository.findByUser(user, pageable);
-        return reviews.map(r -> ReviewDto.builder()
+        
+        if (user.getProfile() == null) {
+            return Page.empty(pageable);
+        }
+        
+        Page<Review> reviews = reviewRepository.findByProfileId(user.getProfile().getId(), pageable);
+        return reviews.map(r -> ReviewResDto.builder()
                 .reviewId(r.getReviewId())
-                .title(r.getTitle())
-                .content(r.getReviewContent())
+                .reviewContent(r.getReviewContent())
                 .build());
     }
 
     private UserProfileDto toDto(User user) {
+        Long reviewCount = 0L;
+        if (user.getProfile() != null) {
+            reviewCount = reviewRepository.countByProfileId(user.getProfile().getId());
+        }
+
         return UserProfileDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getProfile() != null ? user.getProfile().getNickname() : null)
                 .readerType(user.getReaderType() != null ? user.getReaderType().name() : null)
-                .profileImageUrl(user.getProfile() != null ? user.getProfile().getProfileImageUrl() : null)
+                .reviewCount(reviewCount)
                 .build();
     }
 }

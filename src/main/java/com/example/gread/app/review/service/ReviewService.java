@@ -31,13 +31,14 @@ public class ReviewService {
 
     @Transactional
     public ReviewResDto postReview(ReviewReqDto dto, Long profileId, Long bookId) {
-
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.BOOK_NOT_FOUND));
 
+        // [병합 포인트] 수정 전(main)은 minorName을, 수정 후(dev2)는 category를 사용함.
+        // 도서 엔티티에 정의된 필드에 맞춰 선택하세요. 여기선 dev2의 category를 기준으로 통합합니다.
         Review review = new Review(
                 profile,
                 book,
@@ -48,7 +49,7 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(review);
 
-        /* 리뷰 개수 증가 */
+        /* 랭킹 점수(리뷰 개수) 관리 */
         Ranking ranking = rankingRepository.findRankingByProfileId(profileId)
                 .orElseGet(() -> {
                     long lowestRank = rankingRepository.count() + 1;
@@ -64,7 +65,6 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResDto> findReviewByProfileId(Long profileId) {
-
         return reviewRepository.findByProfileId(profileId)
                 .stream()
                 .map(ReviewResDto::from)
@@ -73,36 +73,40 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResDto> findReviewByBookId(Long bookId) {
-
         return reviewRepository.findByBookId(bookId)
                 .stream()
                 .map(ReviewResDto::from)
                 .toList();
     }
 
+    // [추가] 특정 도서의 최신 리뷰 조회 (dev2 로직)
     @Transactional(readOnly = true)
     public List<ReviewResDto> findLatestReviewsByBookId(Long bookId) {
-        List<Review> reviews = reviewRepository.findByBookIdOrderByCreatedAtDesc(bookId);
-        return reviews.stream()
+        return reviewRepository.findByBookIdOrderByCreatedAtDesc(bookId)
+                .stream()
+                .map(ReviewResDto::from)
+                .toList();
+    }
+
+    // [추가] 전체 최신 리뷰 조회 (main 로직 유지 - 필요 시 사용)
+    @Transactional(readOnly = true)
+    public List<ReviewResDto> findAllLatestReviews() {
+        return reviewRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
                 .map(ReviewResDto::from)
                 .toList();
     }
 
     @Transactional
     public ReviewResDto updateReview(ReviewReqDto dto, Long reviewId, Long profileId) {
-
+        // [주의] 메서드명이 findByReviewIdAndProfileId 인지 findByReviewId 인지 Repository 확인 필요
         Review review = reviewRepository
-                .findByReviewId(reviewId, profileId)
+                .findByReviewIdAndProfileId(reviewId, profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
-        review.update(
-                dto.getReviewColor(),
-                dto.getReviewContent()
-        );
-
+        review.update(dto.getReviewColor(), dto.getReviewContent());
         return ReviewResDto.from(review);
     }
-
 
     @Transactional(readOnly = true)
     public Long getReviewCountByBook(Long bookId) {
@@ -111,19 +115,17 @@ public class ReviewService {
 
     @Transactional
     public void deleteReviewById(Long reviewId, Long profileId) {
-
         Review review = reviewRepository
-                .findByReviewId(reviewId, profileId)
+                .findByReviewIdAndProfileId(reviewId, profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
-        /* 리뷰 개수 감소 */
         Ranking ranking = rankingRepository.findRankingByProfileId(profileId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RANKING_NOT_FOUND)); // 삭제라면 반드시 존재해야 함
+                .orElseThrow(() -> new BusinessException(ErrorCode.RANKING_NOT_FOUND));
 
-        ranking.decreaseReviewCount(); // 삭제이므로 감소
-
+        ranking.decreaseReviewCount();
         reviewRepository.delete(review);
 
+        // 랭킹 수치 재계산 트리거
         rankingService.updateRanking();
     }
 }

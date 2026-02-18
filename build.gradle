@@ -1,11 +1,12 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.2' // 존재하지 않는 4.0.1 대신 안정 버전 사용
+    id 'org.springframework.boot' version '3.4.2'
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
+description = 'Gread' // 수정 전 프로젝트 설명 유지
 
 java {
     toolchain {
@@ -24,14 +25,14 @@ repositories {
 }
 
 dependencies {
-    // Spring Boot Starters (이름 정확히 수정)
+    // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web' // webmvc -> web으로 수정
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-    // Lombok (Lombok이 작동해야 getMajorName 등의 에러가 사라집니다)
+    // Lombok - 컴파일 및 테스트 환경 모두 반영 (빌드 에러 방지)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
@@ -41,15 +42,15 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // JWT
+    // JWT (0.12.5 최신 안정 버전 유지)
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // Swagger
+    // Swagger (Spring Doc OpenAPI 3.x 호환 버전)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 
-    // Test (에러 이미지에 나온 테스트 라이브러리들 통합)
+    // Test - 배포 빌드 시 테스트 안정성을 위해 구성
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
