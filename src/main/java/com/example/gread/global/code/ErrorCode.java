@@ -28,7 +28,10 @@ public enum ErrorCode {
     RANKING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자의 랭킹을 찾을 수 없습니다."),
 
     // 인증이 되지 않은 경우
-    USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "인증이 되지 않았습니다.");
+    USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "인증이 되지 않았습니다."),
+
+    // 인증 코드 관련
+    INVALID_AUTH_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 인증 코드입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
