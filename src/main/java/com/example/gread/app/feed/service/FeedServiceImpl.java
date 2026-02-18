@@ -6,6 +6,7 @@ import com.example.gread.app.feed.repository.FeedBookRepository;
 import com.example.gread.app.home.domain.ReaderType;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ public class FeedServiceImpl implements FeedService {
 
     private final FeedBookRepository bookRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public Page<BookDetailResponse> getBooks(String category, String keyword, Pageable pageable) {
@@ -58,6 +60,7 @@ public class FeedServiceImpl implements FeedService {
     }
 
     private BookDetailResponse toDto(Book book) {
+        long reviewCount = reviewRepository.countByBookId(book.getId());
         return BookDetailResponse.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
@@ -66,6 +69,7 @@ public class FeedServiceImpl implements FeedService {
                 .majorName(book.getMajorName())
                 .keyword1(book.getKeyword1())
                 .keyword2(book.getKeyword2())
+                .reviewCount(reviewCount)
                 .build();
     }
 }
