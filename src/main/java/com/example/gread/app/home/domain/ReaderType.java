@@ -3,7 +3,10 @@ package com.example.gread.app.home.domain;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public enum ReaderType {
@@ -26,5 +29,30 @@ public enum ReaderType {
         this.descriptionLines = descriptionLines;
         this.testResultCode = testResultCode;
         this.categoryCodes = categoryCodes;
+    }
+
+    public List<String> getMajorNames() {
+        Set<String> majorNames = new HashSet<>();
+        for (Integer code : categoryCodes) {
+            switch (code) {
+                case 1:
+                case 2:
+                case 5:
+                    majorNames.add("창작");
+                    break;
+                case 3:
+                case 7:
+                    majorNames.add("에세이");
+                    break;
+                case 4:
+                    majorNames.add("유머");
+                    break;
+                case 6:
+                case 8:
+                    majorNames.add("저널리즘");
+                    break;
+            }
+        }
+        return new ArrayList<>(majorNames);
     }
 }

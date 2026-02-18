@@ -1,6 +1,7 @@
 package com.example.gread.app.mypage.controller;
 
 import com.example.gread.app.mypage.dto.UpdateUserRequest;
+import com.example.gread.app.mypage.dto.UserProfileApiResponse;
 import com.example.gread.app.mypage.dto.UserProfileDto;
 import com.example.gread.app.mypage.service.UserService;
 import com.example.gread.global.code.SuccessCode;
@@ -35,7 +36,7 @@ public class MyPageController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "내 정보 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ApiResponseTemplate.class)))
+                            schema = @Schema(implementation = UserProfileApiResponse.class)))
     })
     @GetMapping
     public ResponseEntity<ApiResponseTemplate<UserProfileDto>> getMyInfo(
@@ -47,7 +48,7 @@ public class MyPageController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "내 정보 수정 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ApiResponseTemplate.class)))
+                            schema = @Schema(implementation = UserProfileApiResponse.class)))
     })
     @PutMapping
     public ResponseEntity<ApiResponseTemplate<UserProfileDto>> updateMyInfo(
