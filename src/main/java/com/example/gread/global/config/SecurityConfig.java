@@ -7,7 +7,7 @@ import com.example.gread.app.login.service.AuthService;
 import com.example.gread.app.login.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value; // 추가
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,7 +35,7 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final AuthService authService;
 
-    // [추가] application.yml에 설정된 front-redirect-uri를 가져옵니다.
+    // application.yml의 설정값을 가져와서 리다이렉트 주소로 사용합니다.
     @Value("${spring.security.oauth2.front-redirect-uri}")
     private String frontRedirectUri;
 
@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                // [추가] Mixed Content 에러 방지를 위해 모든 요청에 보안 채널(HTTPS) 사용을 권장하도록 설정
+                // HTTPS 환경에서의 Mixed Content 에러 방지를 위해 보안 채널 설정
                 .requiresChannel(channel -> channel.anyRequest().requiresSecure())
 
                 .authorizeHttpRequests(auth -> auth
@@ -77,8 +77,7 @@ public class SecurityConfig {
 
                             String authCode = authService.generateAuthCode(user.getId());
 
-                            // [수정] http://localhost:3000 하드코딩 대신 설정값(frontRedirectUri)을 사용하여
-                            // 운영 환경 변수에 따라 https 주소로 리다이렉트 되도록 변경
+                            // 하드코딩된 http 주소를 제거하고 설정된 주소를 사용합니다.
                             String targetUrl = frontRedirectUri + "/callback?code=" + authCode;
 
                             log.info("### Redirecting to: {}", targetUrl);
@@ -95,7 +94,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // [수정] Credentials를 true로 사용할 경우 패턴(*) 보다는 명시적인 도메인 설정이 안전합니다.
+        // 운영 및 로컬 도메인을 명시적으로 허용
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://sss-gread.duckdns.org"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
