@@ -34,15 +34,6 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
-    public void completeOnboarding(String nickname, ReaderType readerType) {
-        this.role = Role.USER;
-        if (this.profile != null) {
-            this.profile.setNickname(nickname);
-            this.profile.setReaderType(readerType);
-            this.profile.setTestResultCode(readerType.getTestResultCode());
-        }
-    }
-
     public ReaderType getReaderType() {
         return (this.profile != null) ? this.profile.getReaderType() : null;
     }

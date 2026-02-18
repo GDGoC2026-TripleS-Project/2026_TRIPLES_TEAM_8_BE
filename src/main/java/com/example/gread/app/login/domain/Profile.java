@@ -29,9 +29,6 @@ public class Profile {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(name = "test_result_code")
-    private String testResultCode;
-
     @Column(name = "preference_tags")
     private String preferenceTags;
 

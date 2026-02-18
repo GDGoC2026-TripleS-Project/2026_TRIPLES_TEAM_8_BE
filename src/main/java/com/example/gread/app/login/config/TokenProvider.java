@@ -26,8 +26,8 @@ public class TokenProvider {
 
     public TokenDto createToken(Long userId) {
         long now = (new Date()).getTime();
-        long accessTokenValidityTime = 1000L * 60 * 30; // 30분
-        long refreshTokenValidityTime = 1000L * 60 * 60 * 24 * 7; // 7일
+        long accessTokenValidityTime = 1000L * 60 * 60 * 24;
+        long refreshTokenValidityTime = 1000L * 60 * 60 * 24 * 7;
 
         String accessToken = Jwts.builder()
                 .subject(userId.toString())

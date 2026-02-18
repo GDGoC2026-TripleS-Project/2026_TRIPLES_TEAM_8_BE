@@ -14,5 +14,5 @@ public class UserProfileDto {
     private String email;
     private String nickname;
     private String readerType;
-    private String profileImageUrl;
+    private Long reviewCount;
 }

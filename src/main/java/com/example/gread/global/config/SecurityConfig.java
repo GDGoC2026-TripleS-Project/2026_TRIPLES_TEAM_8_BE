@@ -1,7 +1,6 @@
 package com.example.gread.global.config;
 
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
-import com.example.gread.global.config.JwtAuthenticationEntryPoint;
 import com.example.gread.app.login.config.TokenProvider;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.dto.TokenDto;
@@ -10,7 +9,6 @@ import com.example.gread.app.login.service.AuthService;
 import com.example.gread.app.login.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -40,12 +38,6 @@ public class SecurityConfig {
     private final AuthService authService;
     private final TokenProvider tokenProvider;
 
-    @Value("${spring.security.oauth2.front-redirect-uri}")
-    private String frontRedirectUri;
-
-    @Value("${cors.allowed-origins}")
-    private List<String> allowedOrigins;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -72,21 +64,20 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### 구글 인증 성공! 토큰을 발급합니다.");
+                            log.info("### 구글 인증 성공! 토큰을 발급하여 리다이렉트합니다.");
 
-                            String email = authentication.getName(); // CustomOAuth2UserService에서 설정한 key값(email)
+                            String email = authentication.getName();
                             User user = userRepository.findByEmail(email)
                                     .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
                             TokenDto tokenDto = tokenProvider.createToken(user.getId());
                             authService.saveOrUpdateRefreshToken(user.getId(), tokenDto.getRefreshToken());
 
-                            String targetUrl = UriComponentsBuilder.fromUriString(frontRedirectUri + "/onboarding")
+                            String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/onboarding")
                                     .queryParam("accessToken", tokenDto.getAccessToken())
                                     .queryParam("refreshToken", tokenDto.getRefreshToken())
                                     .build().toUriString();
-
-                            log.info("### 토큰 발급 완료. 리디렉션 URL: {}", targetUrl);
+                            
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -99,7 +90,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));

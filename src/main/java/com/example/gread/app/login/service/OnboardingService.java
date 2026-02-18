@@ -51,7 +51,6 @@ public class OnboardingService {
         }
 
         profile.setNickname(request.getNickname());
-        profile.setTestResultCode(request.getTestResultCode());
         profile.setPreferenceTags(request.getPreferenceTags());
 
         ReaderType readerType;
