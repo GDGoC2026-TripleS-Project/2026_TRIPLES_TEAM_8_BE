@@ -34,7 +34,7 @@ public class SecurityConfig {
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    @Value("${spring.security.front-redirect-uri:https://sss-gread.duckdns.org}")
+    @Value("${spring.security.front-redirect-uri:https://gread.vercel.app}")
     private String frontRedirectUri;
 
     @Bean
@@ -51,20 +51,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                //로그인~
+
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            org.springframework.security.oauth2.core.user.OAuth2User oAuth2User =
-                                    (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
-
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
                             String email = (String) oAuth2User.getAttributes().get("email");
 
                             System.out.println(">>> OAuth 성공! 구글 이메일: " + email);
 
                             User user = userRepository.findByEmail(email)
                                     .orElseGet(() -> {
-                                        System.out.println(">>> [경고] DB에 유저가 없습니다. 임시 유저를 찾거나 에러를 발생시킵니다.");
+                                        System.out.println(">>> [경고] DB에 유저가 없습니다.");
                                         return null;
                                     });
 
@@ -74,13 +72,14 @@ public class SecurityConfig {
                             }
 
                             String authCode = authService.generateAuthCode(user.getId());
-                            String targetUrl = frontRedirectUri + "/callback?code=" + authCode;
+
+                            String targetUrl = frontRedirectUri + "/onboarding?code=" + authCode;
 
                             System.out.println(">>> 최종 리다이렉트 주소: " + targetUrl);
                             response.sendRedirect(targetUrl);
                         })
                 );
-                //~로그인
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
