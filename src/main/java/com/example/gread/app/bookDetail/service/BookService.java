@@ -25,7 +25,7 @@ public class BookService {
         // 2. 해당 도서의 리뷰 개수 조회
         long reviewCount = reviewRepository.countByBookId(id);
 
-        // 3. 도서 엔티티와 리뷰 개수를 응답 DTO로 변환하여 반환
+        // 3. 도서 엔티티와 리뷰 개수를 응답 DTO로 변환하여 반환git
         return BookDetailResponse.from(book, reviewCount);
     }
 }
