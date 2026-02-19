@@ -1,6 +1,6 @@
 package com.example.gread.app.feed.controller;
 
-import com.example.gread.app.bookDetail.dto.BookDetailResponse;
+import com.example.gread.app.feed.dto.FeedResponseDto;
 import com.example.gread.app.feed.service.FeedService;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.code.SuccessCode;
@@ -44,7 +44,7 @@ public class FeedController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class)))
     })
     @GetMapping("/explore")
-    public ResponseEntity<ApiResponseTemplate<List<BookDetailResponse>>> getBooks(
+    public ResponseEntity<ApiResponseTemplate<List<FeedResponseDto>>> getBooks(
             @Parameter(description = "도서 카테고리 (선택) - 예: '전체', '창작', '에세이', '유머', '저널리즘'. 미지정 시 전체 도서 조회.")
             @RequestParam(required = false) String category
     ) {
@@ -61,7 +61,7 @@ public class FeedController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class)))
     })
     @GetMapping
-    public ResponseEntity<ApiResponseTemplate<Page<BookDetailResponse>>> getMyFeed(
+    public ResponseEntity<ApiResponseTemplate<Page<FeedResponseDto>>> getMyFeed(
             @Parameter(hidden = true) Authentication authentication, // Swagger에서 숨김 처리
             @Parameter(description = "페이징 정보 (page: 페이지 번호(0부터 시작), size: 페이지 크기(기본 10), sort: 정렬 기준(예: id,desc / title,asc))")
             @PageableDefault(size = 10) Pageable pageable

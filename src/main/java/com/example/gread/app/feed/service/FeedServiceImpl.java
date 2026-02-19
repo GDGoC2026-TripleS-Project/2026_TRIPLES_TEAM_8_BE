@@ -1,7 +1,7 @@
 package com.example.gread.app.feed.service;
 
-import com.example.gread.app.bookDetail.dto.BookDetailResponse;
 import com.example.gread.app.bookDetail.domain.Book;
+import com.example.gread.app.feed.dto.FeedResponseDto;
 import com.example.gread.app.feed.repository.FeedBookRepository;
 import com.example.gread.app.home.domain.ReaderType;
 import com.example.gread.app.login.domain.User;
@@ -28,7 +28,7 @@ public class FeedServiceImpl implements FeedService {
     private final ReviewRepository reviewRepository;
 
     @Override
-    public List<BookDetailResponse> getBooks(String category) {
+    public List<FeedResponseDto> getBooks(String category) {
         List<Book> books;
         boolean hasCategory = StringUtils.hasText(category) && !category.equals("전체");
 
@@ -41,7 +41,7 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    public Page<BookDetailResponse> getMyFeed(Long userId, Pageable pageable) {
+    public Page<FeedResponseDto> getMyFeed(Long userId, Pageable pageable) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -57,17 +57,8 @@ public class FeedServiceImpl implements FeedService {
         return bookRepository.findAll(pageable).map(this::toDto);
     }
 
-    private BookDetailResponse toDto(Book book) {
+    private FeedResponseDto toDto(Book book) {
         long reviewCount = reviewRepository.countByBookId(book.getId());
-        return BookDetailResponse.builder()
-                .bookId(book.getId())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .publisher(book.getPublisher())
-                .majorName(book.getMajorName())
-                .keyword1(book.getKeyword1())
-                .keyword2(book.getKeyword2())
-                .reviewCount(reviewCount)
-                .build();
+        return FeedResponseDto.of(book, reviewCount);
     }
 }

@@ -77,6 +77,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .nickname(user.getProfile() != null ? user.getProfile().getNickname() : null)
                 .readerType(user.getReaderType() != null ? user.getReaderType().name() : null)
+                .readerTitle(user.getReaderType() != null ? user.getReaderType().getTitle() : null)
                 .reviewCount(reviewCount)
                 .build();
     }
