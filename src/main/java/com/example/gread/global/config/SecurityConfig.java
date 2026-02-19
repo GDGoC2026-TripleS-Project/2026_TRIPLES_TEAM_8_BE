@@ -51,16 +51,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
+                //로그인~
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            org.springframework.security.oauth2.core.user.OAuth2User oAuth2User =
+                                    (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
 
-                            String email = oAuth2User.getAttribute("email");
+                            String email = (String) oAuth2User.getAttributes().get("email");
 
                             User user = userRepository.findByEmail(email)
-                                    .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                                    .orElseThrow(() -> new RuntimeException("DB에 유저가 없습니다: " + email));
 
                             Long userId = user.getId();
                             String authCode = authService.generateAuthCode(userId);
@@ -69,7 +70,7 @@ public class SecurityConfig {
                             response.sendRedirect(targetUrl);
                         })
                 );
-
+                //~로그인
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
