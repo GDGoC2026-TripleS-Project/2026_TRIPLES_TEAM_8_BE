@@ -19,7 +19,9 @@ public interface FeedBookRepository extends JpaRepository<Book, Long> {
             "LOWER(b.keyword2) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Book> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    Page<Book> findByMajorName(String majorName, Pageable pageable);
+    Page<Book> findByMajorName(String majorName, Pageable pageable); // 기존 페이지네이션 포함 메서드
+
+    List<Book> findByMajorName(String majorName); // 페이지네이션 제거된 메서드
 
     @Query("SELECT b FROM Book b WHERE " +
             "b.majorName = :majorName AND (" +
