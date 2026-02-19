@@ -8,8 +8,6 @@ import com.example.gread.global.exception.BusinessException;
 import com.example.gread.global.responseTemplate.ApiResponseTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,12 +34,9 @@ public class FeedController {
 
     @Operation(summary = "탐색 피드 조회 (비회원/공통)", description = "카테고리로 도서 목록을 필터링하여 조회합니다. 페이지네이션과 키워드 검색은 지원하지 않습니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class)))
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/explore")
     public ResponseEntity<ApiResponseTemplate<List<FeedResponseDto>>> getBooks(
@@ -53,12 +48,9 @@ public class FeedController {
 
     @Operation(summary = "내 피드 조회 (회원 전용)", description = "로그인한 사용자의 관심사에 맞는 도서 리스트를 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class))),
-            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseTemplate.class)))
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping
     public ResponseEntity<ApiResponseTemplate<Page<FeedResponseDto>>> getMyFeed(
