@@ -34,7 +34,8 @@ public class SecurityConfig {
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    @Value("${spring.security.front-redirect-uri:https://gread.vercel.app}")
+    // [수정] 기본값을 로컬 3000번 포트로 설정합니다.
+    @Value("${spring.security.front-redirect-uri:http://localhost:3000}")
     private String frontRedirectUri;
 
     @Bean
@@ -73,6 +74,7 @@ public class SecurityConfig {
 
                             String authCode = authService.generateAuthCode(user.getId());
 
+                            // [수정] localhost:3000/onboarding 경로로 code 전달
                             String targetUrl = frontRedirectUri + "/onboarding?code=" + authCode;
 
                             System.out.println(">>> 최종 리다이렉트 주소: " + targetUrl);
@@ -87,7 +89,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // 로컬 개발을 위해 localhost:3000을 명시적으로 허용하거나 패턴 사용
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://gread.vercel.app", "https://sss-gread.duckdns.org"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
