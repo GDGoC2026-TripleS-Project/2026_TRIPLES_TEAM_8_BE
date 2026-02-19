@@ -1,11 +1,15 @@
 package com.example.gread.global.config;
 
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
+import com.example.gread.app.login.service.AuthService;
 import com.example.gread.app.login.service.CustomOAuth2UserService;
+import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.login.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +31,12 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final AuthService authService;
+    private final UserRepository userRepository;
+
+    // [수정] 기본값을 로컬 3000번 포트로 설정합니다.
+    @Value("${spring.security.front-redirect-uri:http://localhost:3000}")
+    private String frontRedirectUri;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,8 +56,29 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            // 복잡한 로직 없이 일단 프론트로 리다이렉트만 시킵니다.
-                            response.sendRedirect("https://sss-gread.duckdns.org/callback");
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            String email = (String) oAuth2User.getAttributes().get("email");
+
+                            System.out.println(">>> OAuth 성공! 구글 이메일: " + email);
+
+                            User user = userRepository.findByEmail(email)
+                                    .orElseGet(() -> {
+                                        System.out.println(">>> [경고] DB에 유저가 없습니다.");
+                                        return null;
+                                    });
+
+                            if (user == null) {
+                                response.sendRedirect(frontRedirectUri + "/login?error=user_not_found");
+                                return;
+                            }
+
+                            String authCode = authService.generateAuthCode(user.getId());
+
+                            // [수정] localhost:3000/onboarding 경로로 code 전달
+                            String targetUrl = frontRedirectUri + "/onboarding?code=" + authCode;
+
+                            System.out.println(">>> 최종 리다이렉트 주소: " + targetUrl);
+                            response.sendRedirect(targetUrl);
                         })
                 );
 
@@ -58,7 +89,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // 로컬 개발을 위해 localhost:3000을 명시적으로 허용하거나 패턴 사용
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://gread.vercel.app", "https://sss-gread.duckdns.org"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

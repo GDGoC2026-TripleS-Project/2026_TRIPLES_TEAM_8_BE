@@ -13,12 +13,14 @@ import java.util.List;
 public class HomeResponseDto {
     private String nickname;
     private String readerType;
+    private String readerTitle;
     private List<ReviewResponseDto> reviews;
 
     public static HomeResponseDto forGuest(List<ReviewResponseDto> reviews) {
         return HomeResponseDto.builder()
                 .nickname("방문자")
                 .readerType(null)
+                .readerTitle(null)
                 .reviews(reviews)
                 .build();
     }

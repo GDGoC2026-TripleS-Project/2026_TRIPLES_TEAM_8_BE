@@ -9,15 +9,15 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID:608759947142-m7ugod2n6mcfagmnjf82ug53m6btnshn.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET: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}
             scope:
               - profile
               - email
-            # [중요] 구글 콘솔에 등록된 https 주소와 정확히 일치해야 합니다.
-            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            redirect-uri: "https://sss-gread.duckdns.org/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
       # 인증 완료 후 프론트엔드로 돌아갈 주소 (운영은 https 필수)
-      front-redirect-uri: ${FRONT_REDIRECT_URI:https://sss-gread.duckdns.org}
+      front-redirect-uri: "https://gread.vercel.app"
   jpa:
     hibernate:
       ddl-auto: update
