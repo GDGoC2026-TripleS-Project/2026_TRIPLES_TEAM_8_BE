@@ -6,6 +6,7 @@ import com.example.gread.app.login.service.CustomOAuth2UserService;
 import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.app.login.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,11 +55,14 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            User user = userRepository.findByEmail(authentication.getName())
-                                    .orElseThrow(() -> new RuntimeException("User not found"));
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+
+                            String email = oAuth2User.getAttribute("email");
+
+                            User user = userRepository.findByEmail(email)
+                                    .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
                             Long userId = user.getId();
-
                             String authCode = authService.generateAuthCode(userId);
 
                             String targetUrl = frontRedirectUri + "/callback?code=" + authCode;
