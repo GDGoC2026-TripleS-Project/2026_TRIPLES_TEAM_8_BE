@@ -44,7 +44,7 @@ public class MyPageController {
         return ApiResponseTemplate.success(SuccessCode.OK, userService.getMyProfile(Long.parseLong(userId)));
     }
 
-    @Operation(summary = "내 정보 수정", description = "내 닉네임, 프로필 이미지 URL 등을 수정한다.")
+    @Operation(summary = "내 정보 수정", description = "내 닉네임, 프로필 등을 수정한다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "내 정보 수정 성공",
                     content = @Content(mediaType = "application/json",
