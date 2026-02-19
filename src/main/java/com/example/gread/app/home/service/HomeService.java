@@ -54,6 +54,7 @@ public class HomeService {
         return HomeResponseDto.builder()
                 .nickname(user.getProfile() != null ? user.getProfile().getNickname() : user.getName())
                 .readerType(user.getReaderType().name())
+                .readerTitle(user.getReaderType().getTitle())
                 .reviews(convertToDtoList(reviews))
                 .build();
     }
@@ -63,6 +64,7 @@ public class HomeService {
         return HomeResponseDto.builder()
                 .nickname("방문자")
                 .readerType(null)
+                .readerTitle(null)
                 .reviews(convertToDtoList(reviews))
                 .build();
     }
@@ -74,8 +76,10 @@ public class HomeService {
                         .category(r.getCategory())
                         .content(r.getReviewContent())
                         .authorNickname(r.getProfile() != null ? r.getProfile().getNickname() : "독자")
+                        .authorProfile(null)
                         .createdAt(r.getCreatedAt() != null ? r.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "")
                         .bookTitle(r.getBook() != null ? r.getBook().getTitle() : "제목 없음")
+                        .color(r.getReviewColor() != null ? r.getReviewColor().name() : null)
                         .build())
                 .collect(Collectors.toList());
     }
