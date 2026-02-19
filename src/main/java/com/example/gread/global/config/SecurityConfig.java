@@ -49,32 +49,33 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
+                // HTTPS 환경 유지를 위해 보안 채널 설정
                 .requiresChannel(channel -> channel.anyRequest().requiresSecure())
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/favicon.ico").permitAll()
                         .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
-                        .requestMatchers("/api/home/**", "/api/feed/explore").permitAll()
+                        .requestMatchers("/api/feed/explore").permitAll()
                         .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            log.info("### OAuth2 인증 성공! 유저 정보를 조회합니다.");
+                            log.info("### OAuth2 성공! 리다이렉트를 진행합니다.");
 
-                            String googleSub = authentication.getName();
-                            User user = userRepository.findByGoogleSub(googleSub)
-                                    .orElseThrow(() -> new RuntimeException("해당 구글 식별자로 유저를 찾을 수 없습니다."));
+                            String email = authentication.getName();
+                            User user = userRepository.findByEmail(email)
+                                    .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
                             String authCode = authService.generateAuthCode(user.getId());
 
+                            // 최종 프론트엔드 리다이렉트 주소 구성
                             String targetUrl = (frontRedirectUri != null ? frontRedirectUri : "https://sss-gread.duckdns.org")
                                     + "/callback?code=" + authCode;
 
-                            log.info("### Redirecting to Frontend: {}", targetUrl);
+                            log.info("### Redirecting to: {}", targetUrl);
                             response.sendRedirect(targetUrl);
                         })
                 );
@@ -86,13 +87,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
