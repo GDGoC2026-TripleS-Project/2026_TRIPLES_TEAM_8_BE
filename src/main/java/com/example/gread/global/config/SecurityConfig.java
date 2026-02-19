@@ -1,11 +1,14 @@
 package com.example.gread.global.config;
 
 import com.example.gread.app.login.config.JwtAuthenticationFilter;
+import com.example.gread.app.login.service.AuthService;
 import com.example.gread.app.login.service.CustomOAuth2UserService;
+import com.example.gread.app.login.repository.UserRepository;
+import com.example.gread.app.login.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +30,11 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final AuthService authService;
+    private final UserRepository userRepository;
+
+    @Value("${spring.security.front-redirect-uri:https://sss-gread.duckdns.org}")
+    private String frontRedirectUri;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,8 +54,15 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            // 복잡한 로직 없이 일단 프론트로 리다이렉트만 시킵니다.
-                            response.sendRedirect("https://sss-gread.duckdns.org/callback");
+                            User user = userRepository.findByEmail(authentication.getName())
+                                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+                            Long userId = user.getId();
+
+                            String authCode = authService.generateAuthCode(userId);
+
+                            String targetUrl = frontRedirectUri + "/callback?code=" + authCode;
+                            response.sendRedirect(targetUrl);
                         })
                 );
 
