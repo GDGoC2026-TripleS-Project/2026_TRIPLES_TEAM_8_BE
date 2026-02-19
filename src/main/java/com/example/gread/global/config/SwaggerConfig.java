@@ -16,7 +16,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
-        // [추가] 서버 주소를 HTTPS로 명시
+
         Server server = new Server();
         server.setUrl("https://sss-gread.duckdns.org");
         server.setDescription("G-READ Production Server (HTTPS)");
