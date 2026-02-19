@@ -11,13 +11,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FeedServiceImpl implements FeedService {
 
     private final FeedBookRepository bookRepository;
@@ -25,21 +28,16 @@ public class FeedServiceImpl implements FeedService {
     private final ReviewRepository reviewRepository;
 
     @Override
-    public Page<BookDetailResponse> getBooks(String category, String keyword, Pageable pageable) {
-        Page<Book> books;
+    public List<BookDetailResponse> getBooks(String category) {
+        List<Book> books;
         boolean hasCategory = StringUtils.hasText(category) && !category.equals("전체");
-        boolean hasKeyword = StringUtils.hasText(keyword);
 
-        if (hasCategory && hasKeyword) {
-            books = bookRepository.findByMajorNameAndKeyword(category, keyword, pageable);
-        } else if (hasCategory) {
-            books = bookRepository.findByMajorName(category, pageable);
-        } else if (hasKeyword) {
-            books = bookRepository.findByKeyword(keyword, pageable);
+        if (hasCategory) {
+            books = bookRepository.findByMajorName(category);
         } else {
-            books = bookRepository.findAll(pageable);
+            books = bookRepository.findAll();
         }
-        return books.map(this::toDto);
+        return books.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     @Override
