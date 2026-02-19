@@ -11,11 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReviewResponseDto {
     private Long reviewId;
-    private String category;
-    private String content;
-    private String authorNickname;
-    private String authorProfile;
+    private Long profileId;
+    private Long bookId;
+    private String nickname;
+    private String reviewColor;
+    private String reviewContent;
     private String createdAt;
-    private String bookTitle;
-    private String color;
+    private String updatedAt;
+    private Long createdTimeAgo;
 }
