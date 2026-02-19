@@ -8,8 +8,6 @@ import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.app.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -41,7 +39,8 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    public Page<FeedResponseDto> getMyFeed(Long userId, Pageable pageable) {
+    public List<FeedResponseDto> getMyFeed(Long userId) {
+        List<Book> books;
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -49,12 +48,17 @@ public class FeedServiceImpl implements FeedService {
             if (readerType != null) {
                 List<String> majorNames = readerType.getMajorNames();
                 if (!majorNames.isEmpty()) {
-                    return bookRepository.findByMajorNameIn(majorNames, pageable).map(this::toDto);
+                    books = bookRepository.findByMajorNameIn(majorNames);
+                    // 조회된 도서가 있을 경우에만 반환, 없으면 아래 findAll() 로직으로 이동
+                    if (!books.isEmpty()) {
+                        return books.stream().map(this::toDto).collect(Collectors.toList());
+                    }
                 }
             }
         }
-        // 사용자를 찾지 못하거나 ReaderType 정보가 없는 경우 전체 도서 목록 반환
-        return bookRepository.findAll(pageable).map(this::toDto);
+        // 사용자를 찾지 못하거나 ReaderType 정보가 없는 경우, 또는 추천 도서가 없는 경우 전체 도서 목록 반환
+        books = bookRepository.findAll();
+        return books.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     private FeedResponseDto toDto(Book book) {

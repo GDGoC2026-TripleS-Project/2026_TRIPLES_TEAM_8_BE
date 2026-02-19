@@ -1,17 +1,13 @@
 package com.example.gread.app.mypage.service;
 
-import com.example.gread.app.review.dto.ReviewResDto;
 import com.example.gread.app.mypage.dto.UpdateUserRequest;
 import com.example.gread.app.mypage.dto.UserProfileDto;
-import com.example.gread.app.review.domain.Review;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.review.repository.ReviewRepository;
 import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,22 +44,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         userRepository.delete(user);
-    }
-
-    @Override
-    public Page<ReviewResDto> getMyReviews(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        
-        if (user.getProfile() == null) {
-            return Page.empty(pageable);
-        }
-        
-        Page<Review> reviews = reviewRepository.findByProfileId(user.getProfile().getId(), pageable);
-        return reviews.map(r -> ReviewResDto.builder()
-                .reviewId(r.getReviewId())
-                .reviewContent(r.getReviewContent())
-                .build());
     }
 
     private UserProfileDto toDto(User user) {

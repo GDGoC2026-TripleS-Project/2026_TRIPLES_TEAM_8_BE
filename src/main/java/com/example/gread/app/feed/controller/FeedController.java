@@ -12,9 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,13 +50,11 @@ public class FeedController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping
-    public ResponseEntity<ApiResponseTemplate<Page<FeedResponseDto>>> getMyFeed(
-            @Parameter(hidden = true) Authentication authentication, // Swagger에서 숨김 처리
-            @Parameter(description = "페이징 정보 (page: 페이지 번호(0부터 시작), size: 페이지 크기(기본 10), sort: 정렬 기준(예: id,desc / title,asc))")
-            @PageableDefault(size = 10) Pageable pageable
+    public ResponseEntity<ApiResponseTemplate<List<FeedResponseDto>>> getMyFeed(
+            @Parameter(hidden = true) Authentication authentication // Swagger에서 숨김 처리
     ) {
         Long userId = getUserId(authentication);
-        return ApiResponseTemplate.success(SuccessCode.OK, feedService.getMyFeed(userId, pageable));
+        return ApiResponseTemplate.success(SuccessCode.OK, feedService.getMyFeed(userId));
     }
 
     private Long getUserId(Authentication authentication) {
