@@ -20,6 +20,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.core.annotation.Order(1)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
