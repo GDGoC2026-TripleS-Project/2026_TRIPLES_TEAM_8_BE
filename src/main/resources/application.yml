@@ -43,8 +43,8 @@ output:
     enabled: always
 
 jwt:
-  secret: ${JWT_SECRET}
-  access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
+  secret: ${JWT_SECRETyour_very_long_random_string_for_safety_at_least_32_chars}
+  access-token-validity-in-milliseconds: ${ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS:3600000}
 
 cors:
   # 환경변수에서 쉼표로 구분된 도메인 리스트를 읽어옵니다.
