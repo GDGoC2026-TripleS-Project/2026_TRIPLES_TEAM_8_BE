@@ -60,8 +60,10 @@ public class SecurityConfig {
 
                             String email = (String) oAuth2User.getAttributes().get("email");
 
+                            System.out.println("### Login Attempt Email: " + email);
+
                             User user = userRepository.findByEmail(email)
-                                    .orElseThrow(() -> new RuntimeException("DB에 유저가 없습니다: " + email));
+                                    .orElseThrow(() -> new RuntimeException("DB에서 유저를 찾을 수 없습니다: " + email));
 
                             Long userId = user.getId();
                             String authCode = authService.generateAuthCode(userId);
