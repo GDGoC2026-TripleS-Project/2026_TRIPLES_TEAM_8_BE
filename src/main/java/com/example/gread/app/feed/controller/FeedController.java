@@ -1,6 +1,7 @@
 package com.example.gread.app.feed.controller;
 
 import com.example.gread.app.feed.dto.FeedResponseDto;
+import com.example.gread.app.feed.dto.MyFeedResponseDto;
 import com.example.gread.app.feed.service.FeedService;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.code.SuccessCode;
@@ -43,14 +44,14 @@ public class FeedController {
         return ApiResponseTemplate.success(SuccessCode.OK, feedService.getBooks(category));
     }
 
-    @Operation(summary = "내 피드 조회 (회원 전용)", description = "로그인한 사용자의 관심사에 맞는 도서 리스트를 조회합니다.")
+    @Operation(summary = "내 피드 조회 (회원 전용)", description = "로그인한 사용자의 관심사에 맞는 도서 리스트와 추천 카테고리 코드(majorCode)를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping
-    public ResponseEntity<ApiResponseTemplate<List<FeedResponseDto>>> getMyFeed(
+    public ResponseEntity<ApiResponseTemplate<MyFeedResponseDto>> getMyFeed(
             @Parameter(hidden = true) Authentication authentication // Swagger에서 숨김 처리
     ) {
         Long userId = getUserId(authentication);
