@@ -36,6 +36,7 @@ public class FeedServiceImpl implements FeedService {
             books = bookRepository.findByMajorName(category);
         } else {
             books = bookRepository.findAll();
+            Collections.shuffle(books); // 전체 조회 시 리스트를 섞음
         }
         return books.stream().map(this::toDto).collect(Collectors.toList());
     }
@@ -62,6 +63,7 @@ public class FeedServiceImpl implements FeedService {
         }
 
         books = bookRepository.findAll();
+        Collections.shuffle(books); // 추천 도서가 없거나 비회원일 경우 전체 리스트를 섞음
         List<FeedResponseDto> bookDtos = books.stream().map(this::toDto).collect(Collectors.toList());
         return MyFeedResponseDto.of(majorCode, bookDtos);
     }
