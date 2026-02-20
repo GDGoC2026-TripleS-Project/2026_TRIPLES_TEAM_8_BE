@@ -2,6 +2,7 @@ package com.example.gread.app.feed.service;
 
 import com.example.gread.app.bookDetail.domain.Book;
 import com.example.gread.app.feed.dto.FeedResponseDto;
+import com.example.gread.app.feed.dto.MyFeedResponseDto;
 import com.example.gread.app.feed.repository.FeedBookRepository;
 import com.example.gread.app.home.domain.ReaderType;
 import com.example.gread.app.login.domain.User;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,26 +41,29 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    public List<FeedResponseDto> getMyFeed(Long userId) {
+    public MyFeedResponseDto getMyFeed(Long userId) {
         List<Book> books;
+        List<Integer> majorCode = Collections.emptyList();
         Optional<User> userOptional = userRepository.findById(userId);
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             ReaderType readerType = user.getReaderType();
             if (readerType != null) {
+                majorCode = readerType.getCategoryCodes();
                 List<String> majorNames = readerType.getMajorNames();
                 if (!majorNames.isEmpty()) {
                     books = bookRepository.findByMajorNameIn(majorNames);
-                    // 조회된 도서가 있을 경우에만 반환, 없으면 아래 findAll() 로직으로 이동
                     if (!books.isEmpty()) {
-                        return books.stream().map(this::toDto).collect(Collectors.toList());
+                        return MyFeedResponseDto.of(majorCode, books.stream().map(this::toDto).collect(Collectors.toList()));
                     }
                 }
             }
         }
-        // 사용자를 찾지 못하거나 ReaderType 정보가 없는 경우, 또는 추천 도서가 없는 경우 전체 도서 목록 반환
+
         books = bookRepository.findAll();
-        return books.stream().map(this::toDto).collect(Collectors.toList());
+        List<FeedResponseDto> bookDtos = books.stream().map(this::toDto).collect(Collectors.toList());
+        return MyFeedResponseDto.of(majorCode, bookDtos);
     }
 
     private FeedResponseDto toDto(Book book) {
