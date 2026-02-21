@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
-public enum ReaderType {
+public enum ReaderType{
     TYPE_A("감성 몰입형 독자", List.of("인물의 감정 변화와 문장의 온도를 따라", "읽는 편이에요. 읽는 동안만큼은 현실보다", "이야기의 세계에 머무는 걸 좋아해요."), List.of(811,812,813)),
     TYPE_B("사유 감상형 독자", List.of("느낀 감정을 쉽게 놓지 않는 독자예요.", "읽는 순간의 감정도 중요하지만, 책을", "덮은 뒤에도 생각이 이어지는 글에 끌려요."), List.of(812,813)),
     TYPE_C("공감 휴식형 독자", List.of("짧은 글로 마음을 쉬게 하는 독자예요.", "길지 않은 문장 속에서 위로와 공감을 찾고,", "일상의 틈에 가볍게 읽을 수 있는 글을 선호해요."), List.of(814,816)),
