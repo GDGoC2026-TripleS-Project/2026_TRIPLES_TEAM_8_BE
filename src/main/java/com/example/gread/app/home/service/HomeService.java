@@ -46,7 +46,7 @@ public class HomeService {
     private HomeResponseDto getMemberHomeData(User user) {
         if (user.getReaderType() == null) return getGuestHomeData();
 
-        List<String> categories = user.getReaderType().getCategoryCodes().stream()
+        List<String> categories = user.getReaderType().getMinorCodes().stream()
                 .map(String::valueOf)
                 .collect(Collectors.toList());
 
