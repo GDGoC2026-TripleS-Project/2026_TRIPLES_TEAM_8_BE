@@ -55,7 +55,7 @@ public class Review extends BaseTimeEntity{
         this.book = book;
         this.reviewColor = reviewColor;
         this.reviewContent = reviewContent;
-        this.minorCode = minorCode;
+        this.minorCode = getBook().getMinorCode();
     }
 
     public void update(ReviewColor reviewColor, String reviewContent) {
