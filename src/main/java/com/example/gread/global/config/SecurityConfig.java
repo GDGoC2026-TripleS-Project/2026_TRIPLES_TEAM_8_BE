@@ -50,6 +50,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // 리뷰 생성, 리뷰 삭제 (회원용)
+                        .requestMatchers(HttpMethod.POST, "/api/books/*/reviews").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/*").authenticated()
+
+                        //랭킹 관련 조회
+                        .requestMatchers("/api/reviews/ranking/**").permitAll()
+
+                        // 내가 쓴 리뷰 조회
+                        .requestMatchers("/api/users/me/reviews").permitAll()
+
                         .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/api/feed/explore").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()

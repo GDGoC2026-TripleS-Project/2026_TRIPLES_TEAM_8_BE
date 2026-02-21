@@ -13,7 +13,7 @@ import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
-
+    // [추가] 서버 주소를 HTTPS로 명시
     @Bean
     public OpenAPI openAPI() {
 
