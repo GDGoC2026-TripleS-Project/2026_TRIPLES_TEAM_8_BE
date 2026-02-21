@@ -44,7 +44,7 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public MyFeedResponseDto getMyFeed(Long userId) {
         List<Book> books;
-        List<Integer> majorCode = Collections.emptyList();
+        List<String> majorCode = Collections.emptyList(); // 타입을 List<String>으로 변경
         Optional<User> userOptional = userRepository.findById(userId);
 
         if (userOptional.isPresent()) {

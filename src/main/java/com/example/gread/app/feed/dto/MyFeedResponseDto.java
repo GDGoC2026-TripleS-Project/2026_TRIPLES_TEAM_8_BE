@@ -10,6 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class MyFeedResponseDto {
-    private List<Integer> majorCode;
+    private List<String> majorCode; // 타입을 List<String>으로 변경
     private List<FeedResponseDto> books;
 }
