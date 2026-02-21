@@ -78,6 +78,7 @@ public class HomeService {
                         .nickname(r.getProfile() != null ? r.getProfile().getNickname() : "독자")
                         .reviewColor(r.getReviewColor() != null ? r.getReviewColor().name() : "GRAY")
                         .reviewContent(r.getReviewContent())
+                        .category(r.getMinorCode())
                         .createdAt(r.getCreatedAt() != null ? r.getCreatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) : "")
                         .updatedAt(r.getUpdatedAt() != null ? r.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) : "")
                         .createdTimeAgo(0L)
