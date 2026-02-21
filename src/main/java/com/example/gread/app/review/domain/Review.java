@@ -47,15 +47,11 @@ public class Review extends BaseTimeEntity{
     @Column
     private String reviewContent;
 
-    @Column
-    private String category;
-
     public Review(Profile profile, Book book, ReviewColor reviewColor, String reviewContent, String category) {
         this.profile = profile;
         this.book = book;
         this.reviewColor = reviewColor;
         this.reviewContent = reviewContent;
-        this.category = category;
     }
 
     public void update(ReviewColor reviewColor, String reviewContent) {
