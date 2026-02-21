@@ -24,7 +24,7 @@ public class ReviewResDto {
     private LocalDateTime updatedAt;
     private long createdTimeAgo;
 
-    private String minerCode;
+    private String minorCode;
 
     public static ReviewResDto from(Review review){
 
@@ -46,7 +46,7 @@ public class ReviewResDto {
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .createdTimeAgo(createdTimeAgo)
-                .minerCode(review.getBook().getMinorCode())
+                .minorCode(review.getBook().getMinorCode())
                 .build();
     }
 }
