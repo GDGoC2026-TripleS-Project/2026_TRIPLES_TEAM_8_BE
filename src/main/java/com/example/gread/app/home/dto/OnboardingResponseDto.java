@@ -13,5 +13,5 @@ public class OnboardingResponseDto {
     private String readerType;               // "TYPE_B"
     private String readerTitle;              // "사유 감상형 독자"
     private List<String> descriptionLines;   // 문장 단위로 쪼개진 리스트
-    private int recommendedCategoryCode;
+    private String recommendedCategoryCode;
 }
