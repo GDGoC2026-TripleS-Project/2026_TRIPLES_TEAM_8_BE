@@ -57,6 +57,7 @@ public class SecurityConfig {
 
                         //랭킹 관련 조회
                         .requestMatchers("/api/reviews/ranking").permitAll()
+                        .requestMatchers("/api/reviews/ranking/latest").permitAll()
 
                         .requestMatchers("/api/login/**", "/oauth2/**", "/login/oauth2/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/api/feed/explore").permitAll()
