@@ -19,7 +19,7 @@ public class ReviewResDto {
     private String nickname;
     private ReviewColor reviewColor;
     private String reviewContent;
-
+    private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private long createdTimeAgo;

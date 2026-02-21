@@ -5,6 +5,7 @@ import com.example.gread.app.home.dto.ReviewResponseDto;
 import com.example.gread.app.login.domain.User;
 import com.example.gread.app.login.repository.UserRepository;
 import com.example.gread.app.review.domain.Review;
+import com.example.gread.app.review.dto.ReviewResDto;
 import com.example.gread.app.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,17 +72,22 @@ public class HomeService {
 
     private List<ReviewResponseDto> convertToDtoList(List<Review> reviews) {
         return reviews.stream()
-                .map(r -> ReviewResponseDto.builder()
-                        .reviewId(r.getReviewId())
-                        .profileId(r.getProfile() != null ? r.getProfile().getId() : null)
-                        .bookId(r.getBook() != null ? r.getBook().getId() : null)
-                        .nickname(r.getProfile() != null ? r.getProfile().getNickname() : "독자")
-                        .reviewColor(r.getReviewColor() != null ? r.getReviewColor().name() : "GRAY")
-                        .reviewContent(r.getReviewContent())
-                        .createdAt(r.getCreatedAt() != null ? r.getCreatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) : "")
-                        .updatedAt(r.getUpdatedAt() != null ? r.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) : "")
-                        .createdTimeAgo(0L)
-                        .build())
+                .map(r -> {
+                    com.example.gread.app.review.dto.ReviewResDto sharedDto = com.example.gread.app.review.dto.ReviewResDto.from(r);
+
+                    return ReviewResponseDto.builder()
+                            .reviewId(r.getReviewId())
+                            .profileId(r.getProfile() != null ? r.getProfile().getId() : null)
+                            .bookId(r.getBook() != null ? r.getBook().getId() : null)
+                            .nickname(r.getProfile() != null ? r.getProfile().getNickname() : "독자")
+                            .reviewColor(r.getReviewColor() != null ? r.getReviewColor().name() : "GRAY")
+                            .reviewContent(r.getReviewContent())
+                            .category(r.getMinorCode())
+                            .createdAt(r.getCreatedAt() != null ? r.getCreatedAt().toString() : "")
+                            .updatedAt(r.getUpdatedAt() != null ? r.getUpdatedAt().toString() : "")
+                            .createdTimeAgo(sharedDto.getCreatedTimeAgo())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 }
