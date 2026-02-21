@@ -24,6 +24,8 @@ public class ReviewResDto {
     private LocalDateTime updatedAt;
     private long createdTimeAgo;
 
+    private String minerName;
+
     public static ReviewResDto from(Review review){
 
         LocalDateTime createdAt = review.getCreatedAt();
@@ -31,7 +33,7 @@ public class ReviewResDto {
         long createdTimeAgo = 0;
 
         if (createdAt != null) {
-                createdTimeAgo = Duration.between(createdAt, LocalDateTime.now()).toHours();
+            createdTimeAgo = Duration.between(createdAt, LocalDateTime.now()).toHours();
         }
 
         return ReviewResDto.builder()
@@ -44,6 +46,7 @@ public class ReviewResDto {
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .createdTimeAgo(createdTimeAgo)
+                .minerName(review.getBook().getMinorCode())
                 .build();
     }
 }
