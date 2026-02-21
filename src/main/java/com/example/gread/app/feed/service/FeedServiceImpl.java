@@ -51,7 +51,7 @@ public class FeedServiceImpl implements FeedService {
             User user = userOptional.get();
             ReaderType readerType = user.getReaderType();
             if (readerType != null) {
-                majorCode = readerType.getCategoryCodes();
+                majorCode = readerType.getMinorCodes();
                 List<String> majorNames = readerType.getMajorNames();
                 if (!majorNames.isEmpty()) {
                     books = bookRepository.findByMajorNameIn(majorNames);

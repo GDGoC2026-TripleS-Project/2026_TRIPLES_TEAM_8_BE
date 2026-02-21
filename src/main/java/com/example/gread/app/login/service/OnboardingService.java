@@ -71,7 +71,7 @@ public class OnboardingService {
                 .readerType(readerType.name())
                 .readerTitle(readerType.getTitle())
                 .descriptionLines(readerType.getDescriptionLines())
-                .recommendedCategoryCode(readerType.getCategoryCodes().get(0))
+                .recommendedCategoryCode(readerType.getMinorCodes().get(0))
                 .build();
     }
 }
