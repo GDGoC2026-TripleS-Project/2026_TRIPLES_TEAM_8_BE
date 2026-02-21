@@ -16,6 +16,7 @@ public class ReviewResponseDto {
     private String nickname;
     private String reviewColor;
     private String reviewContent;
+    private String minorCode;
     private String category;
     private String createdAt;
     private String updatedAt;

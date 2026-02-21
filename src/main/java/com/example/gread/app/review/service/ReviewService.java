@@ -43,7 +43,7 @@ public class ReviewService {
                 book,
                 dto.getReviewColor(),
                 dto.getReviewContent(),
-                book.getMinorName()
+                book.getMinorCode()
         );
 
         Review savedReview = reviewRepository.save(review);

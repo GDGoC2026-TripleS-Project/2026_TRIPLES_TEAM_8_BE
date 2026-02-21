@@ -16,20 +16,13 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByProfile(Profile profile, Pageable pageable);
-    // 1. 회원용: 특정 카테고리 내에서 랜덤 추출
-    @Query("SELECT r FROM Review r " +
-            "LEFT JOIN FETCH r.book b " +
-            "LEFT JOIN FETCH r.profile p " +
-            "WHERE r.minorCode IN :codes " +  // r.category로 직접 필터링
-            "ORDER BY function('RAND')")
-    List<Review> findRandomByCategoryCodes(@Param("codes") List<String> codes, Pageable pageable);
+    @Query(value = "SELECT * FROM review r " +
+            "WHERE r.minor_code IN :codes " +
+            "ORDER BY RAND() LIMIT 5", nativeQuery = true)
+    List<Review> findRandomByCategoryCodes(@Param("codes") List<String> codes);
 
-    // 3. 비회원용: 전체 리뷰 중 랜덤 5개
-    @Query("SELECT r FROM Review r " +
-            "LEFT JOIN FETCH r.book b " +
-            "LEFT JOIN FETCH r.profile p " +
-            "ORDER BY function('RAND')")
-    List<Review> findRandom5(Pageable pageable);
+    @Query(value = "SELECT * FROM review r ORDER BY RAND() LIMIT 5", nativeQuery = true)
+    List<Review> findRandom5();
 
     List<Review> findByProfileId(Long profileId);
 

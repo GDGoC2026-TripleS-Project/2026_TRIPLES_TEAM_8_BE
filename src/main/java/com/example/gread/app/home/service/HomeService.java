@@ -50,7 +50,7 @@ public class HomeService {
                 .map(String::valueOf)
                 .collect(Collectors.toList());
 
-        List<Review> reviews = reviewRepository.findRandomByCategoryCodes(categories, PageRequest.of(0, 5));
+        List<Review> reviews = reviewRepository.findRandomByCategoryCodes(categories);
 
         return HomeResponseDto.builder()
                 .nickname(user.getProfile() != null ? user.getProfile().getNickname() : user.getName())
@@ -61,7 +61,7 @@ public class HomeService {
     }
 
     private HomeResponseDto getGuestHomeData() {
-        List<Review> reviews = reviewRepository.findRandom5(PageRequest.of(0, 5));
+        List<Review> reviews = reviewRepository.findRandom5();
         return HomeResponseDto.builder()
                 .nickname("방문자")
                 .readerType(null)
