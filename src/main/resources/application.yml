@@ -48,7 +48,7 @@ jwt:
 
 cors:
   # 환경변수에서 쉼표로 구분된 도메인 리스트를 읽어옵니다.
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://sss-gread.duckdns.org}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://sss-gread.duckdns.org,https://gread.vercel.app}
 
 logging:
   level:
