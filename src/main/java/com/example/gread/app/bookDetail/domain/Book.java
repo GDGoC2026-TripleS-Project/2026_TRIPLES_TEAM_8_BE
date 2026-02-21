@@ -1,6 +1,6 @@
 package com.example.gread.app.bookDetail.domain;
 
-import com.example.gread.app.review.domain.Review; // Review 엔티티 임포트
+import com.example.gread.app.review.domain.Review;
 import jakarta.persistence.*;
 import lombok.*;
 
