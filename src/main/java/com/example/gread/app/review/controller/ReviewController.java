@@ -49,14 +49,10 @@ public class ReviewController {
     }
 
     @Operation(summary = "내 리뷰 조회", description = "내 리뷰를 조회합니다.")
-    @GetMapping("/users/me/reviews")
+    @GetMapping("/users/{profileId}/reviews")
     public ResponseEntity<ApiResponseTemplate<List<ReviewResDto>>> getMyReviews(
-            Authentication authentication
+            @PathVariable Long profileId
     ) {
-        if (authentication == null || authentication.getName().equals("anonymousUser")) {
-            throw new BusinessException(ErrorCode.USER_NOT_AUTHENTICATED);
-        }
-        Long profileId = Long.parseLong(authentication.getName());
 
         List<ReviewResDto> reviews = reviewService.findReviewByProfileId(profileId);
         return ApiResponseTemplate.success(SuccessCode.REVIEW_LIST_OK, reviews);

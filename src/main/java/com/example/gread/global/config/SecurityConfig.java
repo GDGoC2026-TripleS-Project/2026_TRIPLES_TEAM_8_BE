@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/*").authenticated()
 
                         //랭킹 관련 조회
-                        .requestMatchers("/api/reviews/ranking/**").permitAll()
+                        .requestMatchers("/api/reviews/ranking").permitAll()
 
                         // 내가 쓴 리뷰 조회
                         .requestMatchers("/api/users/me/reviews").permitAll()
