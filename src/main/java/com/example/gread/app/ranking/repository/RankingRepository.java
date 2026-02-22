@@ -14,5 +14,7 @@ public interface RankingRepository extends JpaRepository<Ranking,Long> {
 
     List<Ranking> findAllByOrderByReviewCountDescIdAsc();
 
+    long countByReviewCountGreaterThan(long myReviewCount);
+
     List<Ranking> findAllByOrderByRankAsc();
 }

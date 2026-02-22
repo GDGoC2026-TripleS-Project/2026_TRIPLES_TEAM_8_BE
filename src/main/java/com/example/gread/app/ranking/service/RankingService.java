@@ -72,25 +72,28 @@ public class RankingService {
     }
 
     @Transactional(readOnly = true)
-    public RankingResDto getMyRanking(Long profileId) {
-        Optional<Ranking> rankingOpt = rankingRepository.findRankingByProfileId(profileId);
-
-        if (rankingOpt.isPresent()) {
-            Ranking r = rankingOpt.get();
-            return RankingResDto.builder()
-                    .nickname(r.getProfile().getNickname())
-                    .reviewCount(r.getReviewCount())
-                    .rank(r.getRank())
-                    .build();
-        }
-
+    public RankingResDto getMyCurrentRanking(Long profileId) {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        // 현재 리뷰 수 조회
+        long myReviewCount = reviewRepository.countByProfileId(profileId);
+
+        // 리뷰가 0이면 순위도 0 반환
+        if (myReviewCount == 0) {
+            return RankingResDto.builder()
+                    .nickname(profile.getNickname())
+                    .reviewCount(0)
+                    .rank(0)
+                    .build();
+        }
+
+        long rank = rankingRepository.countByReviewCountGreaterThan(myReviewCount) + 1;
+
         return RankingResDto.builder()
                 .nickname(profile.getNickname())
-                .reviewCount(0)
-                .rank(0)
+                .reviewCount(myReviewCount)
+                .rank(rank)
                 .build();
     }
 
