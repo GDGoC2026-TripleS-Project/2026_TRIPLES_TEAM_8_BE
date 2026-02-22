@@ -35,7 +35,7 @@ public class SecurityConfig {
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    @Value("${spring.security.front-redirect-uri:https://localhost:3000}")
+    @Value("${spring.security.front-redirect-uri:http://localhost:3000}")
     private String frontRedirectUri;
 
     @Bean
