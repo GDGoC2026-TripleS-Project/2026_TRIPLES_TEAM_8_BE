@@ -72,7 +72,7 @@ public class RankingService {
     }
 
     @Transactional(readOnly = true)
-    public RankingResDto getMyCurrentRanking(Long profileId) {
+    public RankingResDto getMyRanking(Long profileId) {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
