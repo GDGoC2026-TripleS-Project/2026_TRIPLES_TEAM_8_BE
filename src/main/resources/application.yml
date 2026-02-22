@@ -17,7 +17,7 @@ spring:
             redirect-uri: "https://sss-gread.duckdns.org/login/oauth2/code/google"
             authorization-grant-type: authorization_code
       # 인증 완료 후 프론트엔드로 돌아갈 주소 (운영은 https 필수)
-      front-redirect-uri: "https://gread.vercel.app"
+      front-redirect-uri: "https://localhost:3000"
   jpa:
     hibernate:
       ddl-auto: update
