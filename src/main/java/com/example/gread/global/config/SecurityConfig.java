@@ -35,7 +35,7 @@ public class SecurityConfig {
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    @Value("${spring.security.front-redirect-uri:https://localhost:3000}")
+    @Value("${spring.security.front-redirect-uri:https://gread.vercel.app}")
     private String frontRedirectUri;
 
     @Bean
@@ -72,13 +72,8 @@ public class SecurityConfig {
                             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
                             String email = (String) oAuth2User.getAttributes().get("email");
 
-                            System.out.println(">>> OAuth 성공! 구글 이메일: " + email);
-
                             User user = userRepository.findByEmail(email)
-                                    .orElseGet(() -> {
-                                        System.out.println(">>> [경고] DB에 유저가 없습니다.");
-                                        return null;
-                                    });
+                                    .orElseGet(() -> null);
 
                             if (user == null) {
                                 response.sendRedirect(frontRedirectUri + "/login?error=user_not_found");
@@ -86,7 +81,13 @@ public class SecurityConfig {
                             }
 
                             String authCode = authService.generateAuthCode(user.getId());
-                            String targetUrl = frontRedirectUri + "/onboarding?code=" + authCode;
+
+                            String targetUrl;
+                            if (frontRedirectUri.endsWith("/onboarding")) {
+                                targetUrl = frontRedirectUri + "?code=" + authCode;
+                            } else {
+                                targetUrl = frontRedirectUri + "/onboarding?code=" + authCode;
+                            }
 
                             System.out.println(">>> 최종 리다이렉트 주소: " + targetUrl);
                             response.sendRedirect(targetUrl);
