@@ -12,5 +12,7 @@ public interface RankingRepository extends JpaRepository<Ranking,Long> {
 
     List<Ranking> findTop5ByReviewCountGreaterThanOrderByReviewCountDesc(long count);
 
-    List<Ranking> findAllByOrderByReviewCountDesc();
+    List<Ranking> findAllByOrderByReviewCountDescIdAsc();
+
+    List<Ranking> findAllByOrderByRankAsc();
 }

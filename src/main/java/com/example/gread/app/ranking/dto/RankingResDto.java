@@ -10,13 +10,13 @@ public class RankingResDto {
 
     private String nickname;
     private long reviewCount;
-    private long rank;
+    private String rank; // long -> String 변경
 
     public static RankingResDto from(Ranking ranking) {
         return RankingResDto.builder()
                 .nickname(ranking.getProfile().getNickname())
                 .reviewCount(ranking.getReviewCount())
-                .rank(ranking.getRank())
+                .rank(String.valueOf(ranking.getRank()))
                 .build();
     }
 }

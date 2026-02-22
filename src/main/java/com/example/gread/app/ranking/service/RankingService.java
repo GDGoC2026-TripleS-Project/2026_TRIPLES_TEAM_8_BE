@@ -9,11 +9,12 @@ import com.example.gread.app.review.repository.ReviewRepository;
 import com.example.gread.global.code.ErrorCode;
 import com.example.gread.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,57 +24,73 @@ public class RankingService {
     private final ReviewRepository reviewRepository;
     private final ProfileRepository profileRepository;
 
-    @Transactional(readOnly = true)
-    public List<RankingResDto> getTop5() {
-
-        return rankingRepository.findTop5ByReviewCountGreaterThanOrderByReviewCountDesc(0L)
-                .stream()
-                .map(RankingResDto::from)
-                .toList();
-    }
-
     @Transactional
-    public void updateRanking() {
+    public void updateRankings() {
+        List<Object[]> reviewCounts = reviewRepository.countReviewsByProfile();
+        rankingRepository.deleteAll();
 
-        List<Ranking> rankings =
-                rankingRepository.findAllByOrderByReviewCountDesc();
+        int rank = 1;
+        long lastReviewCount = -1;
 
-        long rank = 1;
+        for (Object[] row : reviewCounts) {
+            Profile profile = (Profile) row[0];
+            Long count = (Long) row[1];
+            long reviewCount = count != null ? count : 0;
 
-        for (Ranking r : rankings) {
-            r.updateRank(rank++);
+            if (reviewCount == 0) continue; // 리뷰 없는 사용자는 랭킹에 포함하지 않음
+
+            if (lastReviewCount != -1 && reviewCount < lastReviewCount) {
+                rank++;
+            }
+
+            Ranking ranking = new Ranking(profile, reviewCount, rank);
+            rankingRepository.save(ranking);
+
+            lastReviewCount = reviewCount;
         }
     }
 
-    @Scheduled(fixedRate = 6000) //1분마다
-    @Transactional
-    public void refreshRanking() {
-        updateRanking();
+    @Transactional(readOnly = true)
+    public List<RankingResDto> getTop5() {
+        List<Ranking> rankings = rankingRepository.findAllByOrderByRankAsc();
+
+        List<RankingResDto> result = new ArrayList<>();
+
+        for (Ranking r : rankings) {
+            // 리뷰가 0개인 경우 랭킹 리스트에서 제외 (방어 코드)
+            if (r.getReviewCount() == 0) continue;
+
+            if (result.size() >= 5) break;
+
+            result.add(RankingResDto.builder()
+                    .nickname(r.getProfile().getNickname())
+                    .reviewCount(r.getReviewCount())
+                    .rank(String.valueOf(r.getRank()))
+                    .build());
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)
     public RankingResDto getMyRanking(Long profileId) {
-        List<Ranking> allRankings = rankingRepository.findAllByOrderByReviewCountDesc();
+        Optional<Ranking> rankingOpt = rankingRepository.findRankingByProfileId(profileId);
 
-        for (int i = 0; i < allRankings.size(); i++) {
-            Ranking ranking = allRankings.get(i);
-            if (ranking.getProfile().getId().equals(profileId) && ranking.getReviewCount() != 0) {
-                int rank = i + 1;
-                return RankingResDto.from(ranking);
-            }
+        if (rankingOpt.isPresent()) {
+            Ranking r = rankingOpt.get();
+            return RankingResDto.builder()
+                    .nickname(r.getProfile().getNickname())
+                    .reviewCount(r.getReviewCount())
+                    .rank(String.valueOf(r.getRank()))
+                    .build();
         }
-
-        /* 리뷰가 하나도 없어서 랭킹을 못 매기는 경우 */
 
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        long reviewCount = reviewRepository.countByProfileId(profileId);
-
         return RankingResDto.builder()
                 .nickname(profile.getNickname())
-                .reviewCount(reviewCount)
-                .rank(0)
+                .reviewCount(0)
+                .rank("-")
                 .build();
     }
 

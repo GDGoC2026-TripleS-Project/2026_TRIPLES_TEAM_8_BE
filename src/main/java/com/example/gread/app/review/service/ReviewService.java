@@ -59,6 +59,8 @@ public class ReviewService {
             ranking.increaseReviewCount();
         }
 
+        rankingService.updateRankings();
+
         return ReviewResDto.from(savedReview);
     }
 
@@ -124,6 +126,6 @@ public class ReviewService {
 
         reviewRepository.delete(review);
 
-        rankingService.updateRanking();
+        rankingService.updateRankings();
     }
 }

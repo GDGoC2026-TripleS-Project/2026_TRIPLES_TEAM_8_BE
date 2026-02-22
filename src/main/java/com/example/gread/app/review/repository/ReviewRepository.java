@@ -39,4 +39,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByUser(User user, Pageable pageable);
 
     Page<Review> findByProfileId(Long profileId, Pageable pageable);
+
+    // 프로필별 리뷰 개수 집계 (내림차순 정렬)
+    @Query("SELECT r.profile, COUNT(r) FROM Review r GROUP BY r.profile ORDER BY COUNT(r) DESC")
+    List<Object[]> countReviewsByProfile();
 }
