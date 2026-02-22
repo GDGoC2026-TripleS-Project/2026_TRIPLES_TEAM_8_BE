@@ -65,7 +65,7 @@ public class RankingService {
             result.add(RankingResDto.builder()
                     .nickname(r.getProfile().getNickname())
                     .reviewCount(r.getReviewCount())
-                    .rank(String.valueOf(r.getRank()))
+                    .rank(r.getRank())
                     .build());
         }
         return result;
@@ -80,7 +80,7 @@ public class RankingService {
             return RankingResDto.builder()
                     .nickname(r.getProfile().getNickname())
                     .reviewCount(r.getReviewCount())
-                    .rank(String.valueOf(r.getRank()))
+                    .rank(r.getRank())
                     .build();
         }
 
@@ -90,7 +90,7 @@ public class RankingService {
         return RankingResDto.builder()
                 .nickname(profile.getNickname())
                 .reviewCount(0)
-                .rank("-")
+                .rank(0)
                 .build();
     }
 
